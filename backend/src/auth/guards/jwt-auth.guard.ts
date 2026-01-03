@@ -1,0 +1,27 @@
+import { Injectable, ExecutionContext } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { Reflector } from '@nestjs/core';
+
+/**
+ * JWT Auth Guard
+ * Utilizzato per proteggere endpoint che richiedono autenticazione
+ * Conforme a 3_SOFTWARE_ARCHITECTURE.md sezione 2.6
+ */
+@Injectable()
+export class JwtAuthGuard extends AuthGuard('jwt') {
+  constructor(private reflector: Reflector) {
+    super();
+  }
+
+  canActivate(context: ExecutionContext) {
+    return super.canActivate(context);
+  }
+
+  handleRequest(err: any, user: any, info: any) {
+    if (err || !user) {
+      throw err || new Error('Non autenticato');
+    }
+    return user;
+  }
+}
+
