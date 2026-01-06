@@ -2,26 +2,25 @@ name: Backend CI/CD
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
     paths:
       - 'backend/**'
       - '.github/workflows/backend-ci-cd.yml'
   pull_request:
-    branches: [main, develop]
+    branches: [main]
     paths:
       - 'backend/**'
+  workflow_dispatch:
 
 env:
   PROJECT_ID: raprenger-web
   REGION: europe-west1
-  SERVICE_NAME: rapranger-backend-prod
-  ARTIFACT_REGISTRY: europe-west1-docker.pkg.dev/raprenger-web/rapranger-docker-repo
-  # Workload Identity Federation - questi valori verranno creati da Terraform
-  # Il PROJECT_NUMBER verrà recuperato dinamicamente al primo step
+  REPOSITORY: rapranger-repo
+  IMAGE: backend
 
 jobs:
-  test:
-    name: Test Backend
+  test-and-build:
+    name: Test and Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -41,108 +40,59 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linter
-        run: npm run lint || true # Non bloccare se lint fallisce
+      - name: Run lint
+        run: npm run lint
 
-      - name: Run tests
-        run: npm run test || true # Non bloccare se test falliscono (da implementare)
+      # - name: Run unit tests
+      #   run: npm run test
 
-  build-and-push:
-    name: Build and Push Docker Image
-    needs: test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+      # - name: Run e2e tests
+      #   run: npm run test:e2e
+
+      - name: Build application
+        run: npm run build
+
+  build-push-deploy:
+    name: Build, Push and Deploy
+    needs: test-and-build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Get Project Number
-        id: project-number
-        run: |
-          # Il project number può essere ottenuto via API REST senza autenticazione
-          PROJECT_NUMBER=$(curl -s "https://cloudresourcemanager.googleapis.com/v1/projects/${{ env.PROJECT_ID }}" -H "Accept: application/json" | grep -o '"projectNumber":"[^"]*"' | cut -d'"' -f4 || echo "")
-          if [ -z "$PROJECT_NUMBER" ]; then
-            echo "⚠️  Warning: Could not retrieve project number via API. Trying alternative method..."
-            # Alternativa: usa l'output di Terraform se disponibile o hardcoded value
-            PROJECT_NUMBER="${PROJECT_NUMBER_FROM_TERRAFORM:-}"
-            if [ -z "$PROJECT_NUMBER" ]; then
-              echo "❌ Error: Project number required for WIF. Set PROJECT_NUMBER env var or ensure Terraform outputs are available."
-              exit 1
-            fi
-          fi
-          echo "project_number=$PROJECT_NUMBER" >> $GITHUB_OUTPUT
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: projects/${{ steps.project-number.outputs.project_number }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
-          service_account: github-actions-sa@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Configure Docker for Artifact Registry
-        run: |
-          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-
-      - name: Build Docker image
+    defaults:
+      run:
         working-directory: ./backend
-        run: |
-          docker build -t ${{ env.ARTIFACT_REGISTRY }}/backend:${{ github.sha }} .
-          docker tag ${{ env.ARTIFACT_REGISTRY }}/backend:${{ github.sha }} ${{ env.ARTIFACT_REGISTRY }}/backend:latest
-
-      - name: Push Docker image
-        run: |
-          docker push ${{ env.ARTIFACT_REGISTRY }}/backend:${{ github.sha }}
-          docker push ${{ env.ARTIFACT_REGISTRY }}/backend:latest
-
-  deploy:
-    name: Deploy to Cloud Run
-    needs: build-and-push
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
-    runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get Project Number
-        id: project-number
-        run: |
-          # Il project number può essere ottenuto via API REST senza autenticazione
-          PROJECT_NUMBER=$(curl -s "https://cloudresourcemanager.googleapis.com/v1/projects/${{ env.PROJECT_ID }}" -H "Accept: application/json" | grep -o '"projectNumber":"[^"]*"' | cut -d'"' -f4 || echo "")
-          if [ -z "$PROJECT_NUMBER" ]; then
-            echo "⚠️  Warning: Could not retrieve project number via API. Trying alternative method..."
-            # Alternativa: usa l'output di Terraform se disponibile o hardcoded value
-            PROJECT_NUMBER="${PROJECT_NUMBER_FROM_TERRAFORM:-}"
-            if [ -z "$PROJECT_NUMBER" ]; then
-              echo "❌ Error: Project number required for WIF. Set PROJECT_NUMBER env var or ensure Terraform outputs are available."
-              exit 1
-            fi
-          fi
-          echo "project_number=$PROJECT_NUMBER" >> $GITHUB_OUTPUT
-
       - name: Authenticate to Google Cloud
+        id: auth
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: projects/${{ steps.project-number.outputs.project_number }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
-          service_account: github-actions-sa@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+          workload_identity_provider: 'projects/951012369656/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          service_account: 'github-actions-sa@raprenger-web.iam.gserviceaccount.com'
+          token_format: 'access_token'
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+      - name: Login to Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGION }}-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:latest,${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
 
       - name: Deploy to Cloud Run
-        run: |
-          gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image ${{ env.ARTIFACT_REGISTRY }}/backend:latest \
-            --region ${{ env.REGION }} \
-            --platform managed \
-            --allow-unauthenticated \
-            --quiet
-
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: rapranger-backend-production
+          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
+          region: ${{ env.REGION }}
