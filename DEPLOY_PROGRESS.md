@@ -7,10 +7,11 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - [x] Analisi codebase iniziale
 - [x] Individuazione infrastruttura Terraform (GCP)
 - [ ] Verifica configurazione GitHub Actions
-    - **ERRORE**: Fallimento autenticazione GCP. Errore: `google-github-actions/auth failed with: the GitHub Action workflow must specify exactly one of "workload_identity_provider" or "credentials_json"`.
-    - **AZIONE**: Configurare Workload Identity Federation (WIF) per evitare l'uso di chiavi JSON.
+    - **ERRORE**: Autenticazione fallita per Project ID/Number errato (`951012369656` invece di `6911179946`).
+    - **AZIONE**: Aggiornare i workflow con il Project Number corretto (`6911179946`).
 - [ ] Verifica configurazione Docker
 - [ ] Setup Progetto GCP (Prerequisito manuale/esterno)
+    - **STATUS**: WIF Bootstrap completato manualmente.
 - [ ] Deploy Infrastruttura
 - [ ] Deploy Applicazione
 
@@ -22,6 +23,5 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - **CI/CD**: GitHub Actions
 
 ## Prossimi Passi
-1. Aggiornare i workflow GitHub Actions per utilizzare Workload Identity Federation.
-2. Verificare la configurazione Terraform per WIF (`infrastructure/wif.tf`).
-3. Pushare le modifiche e monitorare la pipeline.
+1. Aggiornare i file YAML dei workflow con il corretto `workload_identity_provider`.
+2. Pushare le modifiche e verificare la pipeline.
