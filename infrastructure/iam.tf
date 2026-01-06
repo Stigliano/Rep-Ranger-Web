@@ -90,7 +90,7 @@ resource "google_service_account_iam_member" "github_actions_workload_identity" 
 }
 
 # Data source per ottenere il project number (necessario per il binding)
-data "google_project" "project" {
-  project_id = var.project_id
-}
+# data "google_project" "project" {
+#   project_id = var.project_id
+# }
 
