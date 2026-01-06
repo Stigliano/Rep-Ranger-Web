@@ -138,8 +138,5 @@ jobs:
       - name: Terraform Apply
         run: |
           terraform apply \
-            -var="project_id=${{ env.PROJECT_ID }}" \
-            -var="region=${{ env.REGION }}" \
-            -var="github_repository=${{ env.GITHUB_REPOSITORY }}" \
             -auto-approve \
             tfplan
