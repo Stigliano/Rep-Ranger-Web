@@ -7,8 +7,9 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - [x] Analisi codebase iniziale
 - [x] Individuazione infrastruttura Terraform (GCP)
 - [ ] Verifica configurazione GitHub Actions
-    - **ERRORE**: Autenticazione fallita per Project ID/Number errato (`951012369656` invece di `6911179946`).
-    - **AZIONE**: Aggiornare i workflow con il Project Number corretto (`6911179946`).
+    - **STATUS**: Autenticazione WIF configurata e funzionante.
+    - **RISULTATO**: `terraform plan` eseguito con successo.
+    - **ATTENZIONE**: `terraform apply` è stato saltato (skipped). Questo accade spesso se l'environment "production" richiede approvazione manuale su GitHub o se le condizioni `if` non sono soddisfatte, ma qui sembra tutto corretto (`refs/heads/main` e `push`).
 - [ ] Verifica configurazione Docker
 - [ ] Setup Progetto GCP (Prerequisito manuale/esterno)
     - **STATUS**: WIF Bootstrap completato manualmente.
@@ -23,5 +24,5 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - **CI/CD**: GitHub Actions
 
 ## Prossimi Passi
-1. Aggiornare i file YAML dei workflow con il corretto `workload_identity_provider`.
-2. Pushare le modifiche e verificare la pipeline.
+1. Indagare perché `terraform apply` è stato skippato (controllare configurazione Environment su GitHub).
+2. Configurare Environment "production" su GitHub Settings -> Environments se non esiste.

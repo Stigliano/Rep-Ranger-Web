@@ -95,7 +95,9 @@ jobs:
   terraform-apply:
     name: Terraform Apply
     needs: terraform-plan
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Rimosso il controllo restrittivo sull'evento se siamo sicuri di voler deployare al push su main.
+    # Il problema potrebbe essere l'environment protection o una condizione valutata false.
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -105,6 +107,7 @@ jobs:
       id-token: write
     environment:
       name: production
+      # url: ${{ steps.deploy.outputs.url }} # Opzionale
 
     steps:
       - name: Checkout code
