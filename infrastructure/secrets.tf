@@ -3,7 +3,7 @@ resource "google_secret_manager_secret" "db_password" {
   secret_id = "rapranger-db-password-${var.environment}"
 
   replication {
-    automatic = true
+    auto {}
   }
 
   labels = {
@@ -17,7 +17,7 @@ resource "google_secret_manager_secret" "jwt_secret" {
   secret_id = "rapranger-jwt-secret-${var.environment}"
 
   replication {
-    automatic = true
+    auto {}
   }
 
   labels = {
@@ -31,7 +31,7 @@ resource "google_secret_manager_secret" "jwt_refresh_secret" {
   secret_id = "rapranger-jwt-refresh-secret-${var.environment}"
 
   replication {
-    automatic = true
+    auto {}
   }
 
   labels = {
@@ -45,7 +45,7 @@ resource "google_secret_manager_secret" "audit_encryption_key" {
   secret_id = "rapranger-audit-encryption-key-${var.environment}"
 
   replication {
-    automatic = true
+    auto {}
   }
 
   labels = {
