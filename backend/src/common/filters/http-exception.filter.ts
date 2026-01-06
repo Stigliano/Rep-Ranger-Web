@@ -33,9 +33,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
       } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
-        const responseObj = exceptionResponse as any;
-        message = responseObj.message || message;
-        code = responseObj.code || code;
+        const responseObj = exceptionResponse as Record<string, unknown>;
+        message = (responseObj.message as string) || message;
+        code = (responseObj.code as string) || code;
       }
     } else if (exception instanceof Error) {
       message = exception.message;
@@ -52,9 +52,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         exception instanceof Error ? exception.stack : JSON.stringify(exception),
       );
     } else {
-      this.logger.warn(
-        `Client error ${status} on ${request.method} ${request.url}: ${message}`,
-      );
+      this.logger.warn(`Client error ${status} on ${request.method} ${request.url}: ${message}`);
     }
 
     // Risposta strutturata
@@ -72,4 +70,3 @@ export class HttpExceptionFilter implements ExceptionFilter {
     response.status(status).json(errorResponse);
   }
 }
-

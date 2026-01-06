@@ -59,3 +59,4 @@ export class UserEntity {
   settings: UserSettingsEntity;
 }
 
+export { UserEntity as User };

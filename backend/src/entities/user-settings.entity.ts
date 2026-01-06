@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
+  Check,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 
@@ -14,6 +15,9 @@ import { UserEntity } from './user.entity';
  * Conforme a 5_DB_ARCHITECTURE.md sezione 3.1.3
  */
 @Entity('user_settings')
+@Check(`"language" IN ('it', 'en')`)
+@Check(`"units" IN ('metric', 'imperial')`)
+@Check(`"feature_level" IN ('basic', 'advanced')`)
 export class UserSettingsEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -25,7 +29,6 @@ export class UserSettingsEntity {
     type: 'varchar',
     length: 10,
     default: 'it',
-    check: "language IN ('it', 'en')",
   })
   language: 'it' | 'en';
 
@@ -33,7 +36,6 @@ export class UserSettingsEntity {
     type: 'varchar',
     length: 20,
     default: 'metric',
-    check: "units IN ('metric', 'imperial')",
   })
   units: 'metric' | 'imperial';
 
@@ -42,7 +44,6 @@ export class UserSettingsEntity {
     length: 20,
     default: 'advanced',
     name: 'feature_level',
-    check: "feature_level IN ('basic', 'advanced')",
   })
   featureLevel: 'basic' | 'advanced';
 
@@ -66,4 +67,3 @@ export class UserSettingsEntity {
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: UserEntity;
 }
-

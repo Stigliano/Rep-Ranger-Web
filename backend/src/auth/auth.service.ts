@@ -1,12 +1,9 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from './user.service';
 import { UserEntity } from '../entities/user.entity';
+import * as crypto from 'crypto';
 
 /**
  * Payload JWT
@@ -72,13 +69,10 @@ export class AuthService {
       expiresIn: this.configService.get<string>('JWT_EXPIRATION', '15m'),
     });
 
-    const refreshToken = this.jwtService.sign(
-      payload,
-      {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION', '30d'),
-      },
-    );
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION', '30d'),
+    });
 
     // Aggiorna ultimo login
     await this.userService.updateLastLogin(user.id);
@@ -97,11 +91,7 @@ export class AuthService {
   /**
    * Registrazione nuovo utente
    */
-  async register(
-    email: string,
-    password: string,
-    name: string,
-  ): Promise<LoginResponse> {
+  async register(email: string, password: string, name: string): Promise<LoginResponse> {
     // Verifica se email esiste già
     const emailExists = await this.userService.emailExists(email);
     if (emailExists) {
@@ -159,5 +149,45 @@ export class AuthService {
       throw new UnauthorizedException('Token non valido');
     }
   }
-}
 
+  /**
+   * Richiesta recupero password
+   */
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.userService.findByEmail(email);
+    if (!user) {
+      // Non riveliamo se l'email esiste o no per sicurezza
+      return;
+    }
+
+    // Genera token
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1); // Valido 1 ora
+
+    await this.userService.setResetToken(user.id, token, expiresAt);
+
+    // TODO: Implementare invio email reale
+    // Per ora logghiamo solo il token per test manuale
+    console.log(`[AUTH] Password reset requested for ${email}`);
+    console.log(`[AUTH] Reset token: ${token}`);
+    console.log(`[AUTH] Reset link: http://localhost:5173/reset-password?token=${token}`);
+  }
+
+  /**
+   * Reset password con token
+   */
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const user = await this.userService.findByResetToken(token);
+    
+    if (!user) {
+      throw new BadRequestException('Token non valido o scaduto');
+    }
+
+    if (user.passwordResetExpiresAt && user.passwordResetExpiresAt < new Date()) {
+      throw new BadRequestException('Token scaduto');
+    }
+
+    await this.userService.updatePassword(user.id, newPassword);
+  }
+}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,9 +16,13 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Recupera la pagina di provenienza se esiste
+  const from = location.state?.from?.pathname || '/';
 
   const {
     register,
@@ -26,6 +30,8 @@ export function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
   });
 
   const onSubmit = async (data: LoginFormData) => {
@@ -35,11 +41,31 @@ export function LoginPage() {
     try {
       const response = await authApi.login(data);
       setAuth(response.user, response.accessToken, response.refreshToken);
-      navigate('/');
+      navigate(from, { replace: true });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || 'Errore durante il login. Riprova.',
-      );
+      let errorMessage = 'Errore durante il login. Riprova.';
+      
+      if (err.response) {
+        const status = err.response.status;
+        const data = err.response.data;
+        
+        if (status === 401) {
+          errorMessage = 'Credenziali non valide. Verifica email e password.';
+        } else if (status === 400 && data?.message) {
+          errorMessage = Array.isArray(data.message) 
+            ? data.message.join(', ') 
+            : data.message;
+        } else if (status >= 500) {
+          errorMessage = 'Errore del server. Riprova più tardi.';
+        } else if (data?.message) {
+          errorMessage = data.message;
+        }
+      } else if (err.request) {
+        errorMessage = 'Impossibile connettersi al server. Verifica la connessione.';
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -47,49 +73,69 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Accedi</h2>
+      <Card className="w-full max-w-md p-8 shadow-lg border-t-4 border-blue-600">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">Bentornato</h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Accedi al tuo account RepRanger
+          </p>
+        </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r flex items-start">
+            <svg className="h-5 w-5 text-red-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-sm">{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Input
             label="Email"
             type="email"
+            autoComplete="email"
+            placeholder="nome@esempio.com"
             {...register('email')}
             error={errors.email?.message}
           />
 
-          <Input
-            label="Password"
-            type="password"
-            {...register('password')}
-            error={errors.password?.message}
-          />
+          <div className="space-y-1">
+            <Input
+              label="Password"
+              type="password"
+              autoComplete="current-password"
+              placeholder="••••••••"
+              {...register('password')}
+              error={errors.password?.message}
+            />
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-xs text-blue-600 hover:underline">
+                Password dimenticata?
+              </Link>
+            </div>
+          </div>
 
           <Button
             type="submit"
             variant="primary"
             size="large"
             isLoading={isLoading}
-            className="w-full"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            Accedi
+            {isLoading ? 'Accesso in corso...' : 'Accedi'}
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Non hai un account?{' '}
-          <Link to="/register" className="text-blue-600 hover:underline">
-            Registrati
-          </Link>
-        </p>
+        <div className="mt-6 border-t border-gray-200 pt-6">
+          <p className="text-center text-sm text-gray-600">
+            Non hai un account?{' '}
+            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+              Registrati gratuitamente
+            </Link>
+          </p>
+        </div>
       </Card>
     </div>
   );
 }
-

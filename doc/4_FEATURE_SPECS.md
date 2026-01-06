@@ -865,6 +865,53 @@ Body: {
 
 Il modulo Body Tracking permette all'utente di tracciare peso, circonferenze e foto progresso.
 
+### 6.5 Advanced Body Analysis & Visualization
+
+#### 6.5.1 Visual Body Analysis (SVG Avatar)
+
+**Descrizione:** Generazione dinamica di un avatar SVG basato sulle misurazioni dell'utente.
+
+**Logica:**
+- Mappatura misurazioni -> path SVG
+- Color coding basato su deviazione da target (Verde=Optimal, Ambra=Warning, Blu=Under)
+- Viste multiple: Front, Side
+
+**Perché questa implementazione:**
+- **Feedback Visivo:** Utente visualizza proporzioni in modo intuitivo
+- **Motivazione:** Color coding evidenzia aree di miglioramento
+
+#### 6.5.2 Target Calculations
+
+**Descrizione:** Calcolo target ideali basati su algoritmi scientifici.
+
+**Algoritmi Supportati:**
+1. **Casey Butt Formula:**
+   - Input: Circonferenza polso, caviglia, altezza
+   - Output: Max potenziale muscolare per ogni parte
+   - Base scientifica: Analisi scheletrica
+
+2. **Golden Ratio (Adonis Index):**
+   - Input: Vita, Spalle
+   - Target: Spalle = 1.618 * Vita
+   - Base estetica: V-Taper ideale
+
+**API Endpoint:**
+```
+GET /body-metrics/analysis?method=casey_butt
+```
+
+#### 6.5.3 Expanded Metrics
+
+**Descrizione:** Supporto per metriche antropometriche dettagliate.
+
+**Nuove Metriche:**
+- Lunghezze: Torso, Braccio, Gamba, Collo
+- Scheletro: Polso, Caviglia (per calcoli Casey Butt)
+- Dettaglio: Avambraccio, Polpaccio, Collo
+
+**Validazione:**
+- Range specifici per ogni nuova metrica (es. Polso 10-30cm)
+
 ### 6.2 Peso Corporeo
 
 #### 6.2.1 Inserimento Peso

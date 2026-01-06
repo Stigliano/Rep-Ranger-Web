@@ -1,11 +1,23 @@
 import { DataSource } from 'typeorm';
-import { ConfigService } from '@nestjs/config';
+import * as dotenv from 'dotenv';
+import { resolve } from 'path';
 import { UserEntity } from '../entities/user.entity';
 import { UserProfileEntity } from '../entities/user-profile.entity';
 import { UserSettingsEntity } from '../entities/user-settings.entity';
 import { WorkoutProgramEntity } from '../entities/workout-program.entity';
 import { MicrocycleEntity } from '../entities/microcycle.entity';
 import { WorkoutSessionEntity } from '../entities/workout-session.entity';
+import { WorkoutExerciseEntity } from '../entities/workout-exercise.entity';
+import { ExerciseEntity } from '../entities/exercise.entity';
+import { WorkoutLogEntity } from '../entities/workout-log.entity';
+import { WorkoutLogExerciseEntity } from '../entities/workout-log-exercise.entity';
+import { WorkoutLogSetEntity } from '../entities/workout-log-set.entity';
+
+/**
+ * Carica variabili d'ambiente dal file .env
+ * Necessario per CLI TypeORM che non passa attraverso NestJS
+ */
+dotenv.config({ path: resolve(__dirname, '../../.env') });
 
 /**
  * DataSource per CLI TypeORM (migrazioni)
@@ -25,9 +37,13 @@ export const AppDataSource = new DataSource({
     WorkoutProgramEntity,
     MicrocycleEntity,
     WorkoutSessionEntity,
+    WorkoutExerciseEntity,
+    ExerciseEntity,
+    WorkoutLogEntity,
+    WorkoutLogExerciseEntity,
+    WorkoutLogSetEntity,
   ],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false, // MAI true in produzione
   logging: process.env.NODE_ENV === 'development',
 });
-

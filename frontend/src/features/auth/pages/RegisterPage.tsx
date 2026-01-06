@@ -31,6 +31,8 @@ export function RegisterPage() {
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    mode: 'onBlur', // Valida quando l'utente esce dal campo
+    reValidateMode: 'onChange', // Rivalida durante la digitazione dopo il primo blur
   });
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -45,10 +47,39 @@ export function RegisterPage() {
       });
       setAuth(response.user, response.accessToken, response.refreshToken);
       navigate('/');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || 'Errore durante la registrazione. Riprova.',
-      );
+      // Gestione errori specifici per fornire feedback chiaro all'utente
+      let errorMessage = 'Errore durante la registrazione. Riprova.';
+      
+      if (err.response) {
+        const status = err.response.status;
+        const data = err.response.data;
+        
+        if (status === 400) {
+          // Errori di validazione o email già registrata
+          if (data?.message) {
+            if (Array.isArray(data.message)) {
+              // Errori di validazione multipli dal backend
+              errorMessage = data.message.join(', ');
+            } else if (data.message.includes('Email già registrata')) {
+              errorMessage = 'Questa email è già registrata. Usa un\'altra email o effettua il login.';
+            } else {
+              errorMessage = data.message;
+            }
+          }
+        } else if (status === 409) {
+          errorMessage = 'Questa email è già registrata. Usa un\'altra email o effettua il login.';
+        } else if (status >= 500) {
+          errorMessage = 'Errore del server. Riprova più tardi.';
+        } else if (data?.message) {
+          errorMessage = data.message;
+        }
+      } else if (err.request) {
+        errorMessage = 'Impossibile connettersi al server. Verifica la connessione.';
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

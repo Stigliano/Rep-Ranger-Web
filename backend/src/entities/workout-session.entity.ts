@@ -5,10 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
   Index,
+  Check,
 } from 'typeorm';
 import { MicrocycleEntity } from './microcycle.entity';
+import { WorkoutExerciseEntity } from './workout-exercise.entity';
 
 /**
  * SessionStatus enum
@@ -30,7 +33,8 @@ export enum SessionStatus {
 @Index(['microcycleId'])
 @Index(['status'])
 @Index(['microcycleId', 'orderIndex'])
-@Index(['exerciseIds'], { using: 'GIN' })
+@Check(`"day_of_week" >= 1 AND "day_of_week" <= 7`)
+@Check(`"status" IN ('scheduled', 'in_progress', 'paused', 'completed', 'skipped', 'archived')`)
 export class WorkoutSessionEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -44,7 +48,6 @@ export class WorkoutSessionEntity {
   @Column({
     type: 'integer',
     name: 'day_of_week',
-    check: 'day_of_week >= 1 AND day_of_week <= 7',
   })
   dayOfWeek: number;
 
@@ -64,7 +67,6 @@ export class WorkoutSessionEntity {
     type: 'varchar',
     length: 20,
     default: SessionStatus.SCHEDULED,
-    check: "status IN ('scheduled', 'in_progress', 'paused', 'completed', 'skipped', 'archived')",
   })
   status: SessionStatus;
 
@@ -86,5 +88,9 @@ export class WorkoutSessionEntity {
   })
   @JoinColumn({ name: 'microcycle_id', referencedColumnName: 'id' })
   microcycle: MicrocycleEntity;
-}
 
+  @OneToMany(() => WorkoutExerciseEntity, (exercise) => exercise.session, {
+    cascade: true,
+  })
+  exercises: WorkoutExerciseEntity[];
+}

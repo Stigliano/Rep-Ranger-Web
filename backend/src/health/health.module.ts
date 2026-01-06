@@ -9,4 +9,3 @@ import { DatabaseService } from '../database/database.service';
   providers: [DatabaseService],
 })
 export class HealthModule {}
-

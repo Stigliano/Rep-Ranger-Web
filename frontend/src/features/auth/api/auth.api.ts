@@ -29,6 +29,15 @@ export interface RefreshTokenResponse {
   accessToken: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+}
+
 /**
  * API client per autenticazione
  */
@@ -63,11 +72,16 @@ export const authApi = {
   },
 
   /**
-   * Get profilo utente corrente
+   * Richiesta recupero password
    */
-  getMe: async (): Promise<any> => {
-    const response = await apiClient.get('/auth/me');
-    return response.data;
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<void> => {
+    await apiClient.post('/auth/forgot-password', data);
+  },
+
+  /**
+   * Reset password con token
+   */
+  resetPassword: async (data: ResetPasswordRequest): Promise<void> => {
+    await apiClient.post('/auth/reset-password', data);
   },
 };
-

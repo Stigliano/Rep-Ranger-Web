@@ -9,15 +9,10 @@ import { WorkoutSessionEntity } from '../entities/workout-session.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      WorkoutProgramEntity,
-      MicrocycleEntity,
-      WorkoutSessionEntity,
-    ]),
+    TypeOrmModule.forFeature([WorkoutProgramEntity, MicrocycleEntity, WorkoutSessionEntity]),
   ],
   controllers: [WorkoutProgramController],
   providers: [WorkoutProgramService, WorkoutProgramRepository],
   exports: [WorkoutProgramService],
 })
 export class WorkoutProgramModule {}
-

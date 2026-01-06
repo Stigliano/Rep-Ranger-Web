@@ -572,13 +572,20 @@ CREATE INDEX idx_kpi_configurations_active ON kpi_configurations(user_id, is_act
 
 #### 3.5.1 Tabella: `body_metrics`
 
-**Descrizione:** Misurazioni corporee (peso, circonferenze).
+**Descrizione:** Misurazioni corporee (peso, circonferenze, lunghezze).
 
 ```sql
 CREATE TABLE body_metrics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    metric_type VARCHAR(50) NOT NULL CHECK (metric_type IN ('weight', 'neck', 'chest', 'waist', 'hips', 'thigh', 'arm')),
+    metric_type VARCHAR(50) NOT NULL CHECK (metric_type IN (
+        'weight', 'height',
+        -- Circumferences
+        'neck', 'shoulders', 'chest', 'waist', 'hips', 
+        'bicep', 'forearm', 'wrist', 'thigh', 'calf', 'ankle',
+        -- Lengths
+        'head_length', 'neck_length', 'torso_length', 'arm_length', 'leg_length'
+    )),
     value DECIMAL(6,2) NOT NULL,
     unit VARCHAR(10) NOT NULL CHECK (unit IN ('kg', 'lbs', 'cm', 'inches')),
     measured_at TIMESTAMP NOT NULL,
@@ -603,7 +610,29 @@ CREATE INDEX idx_body_metrics_user_type_time ON body_metrics(user_id, metric_typ
 - **UNIQUE Constraint:** Una misurazione per tipo per giorno
 - **Composite Index:** Query comuni filtrano per user + type + time
 
-#### 3.5.2 Tabella: `body_photos`
+#### 3.5.2 Tabella: `body_tracking_config`
+
+**Descrizione:** Configurazioni per il modulo Body Tracking (target e preferenze).
+
+```sql
+CREATE TABLE body_tracking_config (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    target_method VARCHAR(50) NOT NULL DEFAULT 'casey_butt' CHECK (target_method IN ('casey_butt', 'golden_ratio')),
+    custom_targets JSONB DEFAULT '{}'::jsonb, -- Overrides manuali per target calcolati
+    display_preferences JSONB DEFAULT '{}'::jsonb, -- Es. quali guide mostrare nell'avatar
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_body_tracking_config_user_id ON body_tracking_config(user_id);
+```
+
+**Perché questa struttura:**
+- **User Preference:** Salva metodo di calcolo preferito e target personalizzati.
+- **JSONB:** Flessibilità per configurazioni UI future.
+
+#### 3.5.3 Tabella: `body_photos`
 
 **Descrizione:** Foto progresso corporeo.
 

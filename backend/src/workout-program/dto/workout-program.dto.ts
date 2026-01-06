@@ -1,4 +1,5 @@
 import { ProgramStatus } from '../../entities/workout-program.entity';
+import { SessionStatus } from '../../entities/workout-session.entity';
 
 /**
  * DTO per risposta programma di allenamento
@@ -30,5 +31,36 @@ export class MicrocycleDto {
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
+  sessions?: WorkoutSessionDto[];
 }
 
+/**
+ * DTO per sessione
+ */
+export class WorkoutSessionDto {
+  id: string;
+  microcycleId: string;
+  name: string;
+  dayOfWeek: number;
+  orderIndex: number;
+  estimatedDurationMinutes: number | null;
+  notes: string | null;
+  status: SessionStatus;
+  exercises?: WorkoutExerciseDto[];
+}
+
+/**
+ * DTO per esercizio
+ */
+export class WorkoutExerciseDto {
+  id: string;
+  sessionId: string;
+  exerciseId: string;
+  exerciseName?: string;
+  sets: number;
+  reps: number;
+  weightKg: number;
+  rpe: number | null;
+  notes: string | null;
+  orderIndex: number;
+}

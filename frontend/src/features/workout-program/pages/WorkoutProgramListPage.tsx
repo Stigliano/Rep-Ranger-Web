@@ -1,136 +1,87 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { Button, Card } from '@/shared/ui';
-import { workoutProgramApi, WorkoutProgram } from '../api/workout-program.api';
-import { useAuthStore } from '@/app/store/auth.store';
+import { Link } from 'react-router-dom';
+import { useWorkoutPrograms } from '../api/queries';
+import { Button } from '@/shared/ui/Button';
+import { Card } from '@/shared/ui/Card';
 
-export function WorkoutProgramListPage() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const clearAuth = useAuthStore((state) => state.clearAuth);
-
-  const { data: programs, isLoading, error } = useQuery({
-    queryKey: ['workout-programs'],
-    queryFn: workoutProgramApi.findAll,
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: workoutProgramApi.delete,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workout-programs'] });
-    },
-  });
-
-  const handleLogout = () => {
-    clearAuth();
-    navigate('/login');
-  };
+export const WorkoutProgramListPage = () => {
+  const { data: programs, isLoading, error } = useWorkoutPrograms();
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <p>Caricamento...</p>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <p className="text-red-600">Errore nel caricamento dei programmi</p>
+      <div className="bg-red-50 p-4 rounded-md text-red-700">
+        Error loading programs. Please try again later.
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">I Miei Programmi</h1>
-        <div className="flex gap-2">
-          <Button
-            variant="primary"
-            onClick={() => navigate('/workout-programs/new')}
-          >
-            Nuovo Programma
-          </Button>
-          <Button variant="secondary" onClick={handleLogout}>
-            Logout
-          </Button>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-900">My Workout Programs</h1>
+        <div className="space-x-2">
+            <Link to="/workout-history">
+                <Button variant="secondary">History</Button>
+            </Link>
+            <Link to="/workout-programs/new">
+                <Button>Create Program</Button>
+            </Link>
         </div>
       </div>
 
-      {programs && programs.length === 0 ? (
-        <Card>
-          <p className="text-gray-600 text-center py-8">
-            Nessun programma ancora. Crea il tuo primo programma!
-          </p>
-          <div className="text-center">
-            <Button
-              variant="primary"
-              onClick={() => navigate('/workout-programs/new')}
-            >
-              Crea Programma
-            </Button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {programs?.length === 0 && (
+          <div className="col-span-full text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900">No programs yet</h3>
+            <p className="mt-1 text-sm text-gray-500">Get started by creating your first workout program.</p>
+            <div className="mt-6">
+              <Link to="/workout-programs/new">
+                <Button variant="secondary">Create Program</Button>
+              </Link>
+            </div>
           </div>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {programs?.map((program) => (
-            <WorkoutProgramCard
-              key={program.id}
-              program={program}
-              onDelete={() => deleteMutation.mutate(program.id)}
-              onView={() => navigate(`/workout-programs/${program.id}`)}
-            />
-          ))}
-        </div>
-      )}
+        )}
+
+        {programs?.map((program) => (
+          <Link key={program.id} to={`/workout-programs/${program.id}`} className="block">
+            <Card 
+              className="h-full hover:shadow-lg transition-shadow cursor-pointer border border-gray-100"
+              title={program.name}
+            >
+              <div className="flex flex-col h-full justify-between">
+                <div>
+                  <p className="text-gray-600 mb-4 line-clamp-2 text-sm">
+                    {program.description || 'No description provided.'}
+                  </p>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center text-sm">
+                  <div className="flex items-center text-gray-500">
+                    <span className="font-medium">{program.durationWeeks}</span>
+                    <span className="ml-1">weeks</span>
+                  </div>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
+                    program.status === 'active' 
+                      ? 'bg-green-100 text-green-800' 
+                      : program.status === 'completed'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {program.status}
+                  </span>
+                </div>
+              </div>
+            </Card>
+          </Link>
+        ))}
+      </div>
     </div>
   );
-}
-
-interface WorkoutProgramCardProps {
-  program: WorkoutProgram;
-  onDelete: () => void;
-  onView: () => void;
-}
-
-function WorkoutProgramCard({
-  program,
-  onDelete,
-  onView,
-}: WorkoutProgramCardProps) {
-  return (
-    <Card>
-      <h3 className="text-xl font-semibold mb-2">{program.name}</h3>
-      {program.description && (
-        <p className="text-gray-600 mb-4 line-clamp-2">{program.description}</p>
-      )}
-      <div className="flex justify-between items-center mb-4">
-        <span className="text-sm text-gray-500">
-          {program.durationWeeks} settimane
-        </span>
-        <span
-          className={`px-2 py-1 rounded text-xs ${
-            program.status === 'active'
-              ? 'bg-green-100 text-green-800'
-              : program.status === 'draft'
-              ? 'bg-gray-100 text-gray-800'
-              : 'bg-blue-100 text-blue-800'
-          }`}
-        >
-          {program.status}
-        </span>
-      </div>
-      <div className="flex gap-2">
-        <Button variant="primary" size="small" onClick={onView}>
-          Visualizza
-        </Button>
-        <Button variant="danger" size="small" onClick={onDelete}>
-          Elimina
-        </Button>
-      </div>
-    </Card>
-  );
-}
-
+};

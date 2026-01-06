@@ -2,123 +2,67 @@
 
 ## ✅ Completato
 
-1. **File `.env` creato**: Il file `backend/.env` è stato creato correttamente con tutte le variabili d'ambiente necessarie per lo sviluppo locale.
+1. **Setup Ambiente Base**:
+   - Prerequisiti installati (Node.js v24.12.0, Docker Desktop v4.55.0)
+   - Repository configurato e sincronizzato
+   - Variabili d'ambiente (`.env`) configurate
 
-2. **Script di setup creato**: Lo script `setup-local.ps1` è stato creato e configurato per automatizzare il setup completo.
+2. **Infrastruttura Locale**:
+   - Docker Container per PostgreSQL attivo e funzionante
+   - Script di automazione (`scripts/start-dev.ps1`, `scripts/stop-dev.ps1`, `scripts/run-tests.ps1`) creati e testati
+   - Migrazioni database eseguite con successo (schema completo)
 
-## ⚠️ Prerequisiti Mancanti
+3. **Backend**:
+   - Avviato su `http://localhost:3000`
+   - Health check OK
+   - Connessione DB verificata
+   - **Recupero Password**: Endpoint attivi e testati (E2E).
+   - **Body Tracking**: Module implementato con Controller, Service e DTO.
+   - **Fix Compilazione**: Risolti errori di importazione UserEntity e typo in BodyTrackingService (2026-01-06).
+   - **Test Suite**: Backend Unit (36/36) e E2E (12/12) passati.
 
-Per completare il setup, è necessario installare i seguenti prerequisiti:
+4. **Frontend**:
+   - Avviato su `http://localhost:5173` (o porta disponibile)
+   - **Autenticazione**: Login, Register, Password Dimenticata, Reset Password completi e funzionanti.
+   - **Dashboard**: Layout strutturato con Sidebar/Navbar e visualizzazione statistiche.
+   - **Body Tracking**: Visualizzatore Avatar SVG, input metriche e upload foto implementati.
+   - Routing configurato e protetto.
+   - **Test Suite**: Unit test passati.
 
-### Node.js >= 20
-- **Stato**: Non trovato nel PATH
-- **Download**: https://nodejs.org/
-- **Verifica installazione**: Dopo l'installazione, apri un nuovo terminale e verifica con:
-  ```powershell
-  node --version
-  npm --version
-  ```
+5. **Allenamento Attivo (Frontend)** (2026-01-06):
+   - **Resilienza**: Implementata persistenza automatica su LocalStorage (`active_workout_state`) per prevenire perdita dati.
+   - **Timer Recupero**: Componente `RecoveryTimer` implementato e integrato nel flusso.
+   - **Validazione**: Regole di validazione (min weights/reps) e feedback visivo implementati.
 
-### Docker Desktop
-- **Stato**: Non trovato nel PATH
-- **Download**: https://www.docker.com/products/docker-desktop
-- **Verifica installazione**: Dopo l'installazione, avvia Docker Desktop e verifica con:
-  ```powershell
-  docker --version
-  ```
+## 🚀 Utilizzo Rapido
 
-## 📋 Prossimi Passi
+**Avvio Ambiente Completo:**
+```powershell
+./scripts/start-dev.ps1
+```
 
-Una volta installati Node.js e Docker Desktop:
+**Esecuzione Test:**
+```powershell
+./scripts/run-tests.ps1 -TestType All
+```
 
-1. **Esegui lo script di setup**:
-   ```powershell
-   .\setup-local.ps1
-   ```
+**Arresto Ambiente:**
+```powershell
+./scripts/stop-dev.ps1
+```
 
-   Lo script eseguirà automaticamente:
-   - Verifica prerequisiti
-   - Creazione file `.env` (già fatto)
-   - Installazione dipendenze backend
-   - Installazione dipendenze frontend
-   - Avvio database PostgreSQL via Docker
-   - Esecuzione migrazioni database
+## 📋 Stato Corrente (2026-01-06)
+Funzionalità Core **Allenamento Attivo** implementata e verificata.
+- Backend funzionante e testato (E2E Core Flow passed).
+- Frontend arricchito con funzionalità "Pharma-grade" (Resilienza, Validazione, Tracciabilità).
 
-2. **Avvia l'applicazione**:
+L'applicazione è pronta per l'implementazione delle **Analisi Avanzate**.
 
-   **Terminale 1 - Backend:**
-   ```powershell
-   cd backend
-   npm run start:dev
-   ```
+## 🔜 Prossimi Passi
 
-   **Terminale 2 - Frontend:**
-   ```powershell
-   cd frontend
-   npm run dev
-   ```
+1.  **Dashboard Progressi (`ProgressDashboardPage`)**:
+    -   Visualizzazione grafici volume/intensità.
+    -   Calcolo metriche avanzate (Volume Load, Intensity Factor).
 
-3. **Verifica funzionamento**:
-   - Backend API: http://localhost:3000/api
-   - Frontend: http://localhost:5173
-   - Health Check: http://localhost:3000/api/health
-
-## 🔧 Setup Manuale (Alternativa)
-
-Se preferisci eseguire i passaggi manualmente:
-
-1. **Installa dipendenze backend**:
-   ```powershell
-   cd backend
-   npm install
-   ```
-
-2. **Installa dipendenze frontend**:
-   ```powershell
-   cd frontend
-   npm install
-   ```
-
-3. **Avvia database**:
-   ```powershell
-   docker-compose up -d postgres
-   ```
-
-4. **Esegui migrazioni**:
-   ```powershell
-   cd backend
-   npm run migration:run
-   ```
-
-## 📝 Note
-
-- Il file `.env` è già stato creato in `backend/.env`
-- Le variabili d'ambiente sono configurate per lo sviluppo locale
-- Il database PostgreSQL verrà avviato in un container Docker
-- Le migrazioni creeranno automaticamente lo schema del database
-
-## 🐛 Risoluzione Problemi
-
-### Node.js non trovato
-- Verifica che Node.js sia installato: `node --version`
-- Riavvia il terminale dopo l'installazione
-- Verifica che Node.js sia nel PATH di sistema
-
-### Docker non trovato
-- Verifica che Docker Desktop sia installato e avviato
-- Riavvia Docker Desktop se necessario
-- Verifica con: `docker ps`
-
-### Errori durante npm install
-- Elimina `node_modules` e `package-lock.json`
-- Esegui nuovamente `npm install`
-
-### Database non si avvia
-- Verifica che Docker Desktop sia avviato
-- Controlla i log: `docker-compose logs postgres`
-- Riavvia il container: `docker-compose restart postgres`
-
-### Errori migrazioni
-- Verifica che il database sia avviato: `docker ps`
-- Verifica connessione: `docker exec -it rapranger-db psql -U rapranger_app -d rapranger`
-
+2.  **Testing**:
+    -   Estensione test E2E per coprire casi limite frontend.

@@ -30,6 +30,7 @@ apiClient.interceptors.request.use(
 // Response interceptor: gestisci errori
 apiClient.interceptors.response.use(
   (response) => response,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async (error: any) => {
     if (error.response?.status === 401) {
       // Token scaduto, prova refresh
@@ -45,7 +46,7 @@ apiClient.interceptors.response.use(
           const originalRequest = error.config;
           originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
           return apiClient(originalRequest);
-        } catch (refreshError: any) {
+        } catch (refreshError: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
           // Refresh fallito, logout
           useAuthStore.getState().clearAuth();
           window.location.href = '/login';

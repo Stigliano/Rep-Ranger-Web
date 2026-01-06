@@ -8,6 +8,7 @@ import {
   OneToMany,
   JoinColumn,
   Index,
+  Check,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { MicrocycleEntity } from './microcycle.entity';
@@ -31,6 +32,8 @@ export enum ProgramStatus {
 @Index(['userId'])
 @Index(['status'])
 @Index(['userId', 'status'])
+@Check(`"duration_weeks" >= 1 AND "duration_weeks" <= 52`)
+@Check(`"status" IN ('draft', 'active', 'paused', 'completed', 'archived')`)
 export class WorkoutProgramEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -47,7 +50,6 @@ export class WorkoutProgramEntity {
   @Column({
     type: 'integer',
     name: 'duration_weeks',
-    check: 'duration_weeks >= 1 AND duration_weeks <= 52',
   })
   durationWeeks: number;
 
@@ -55,7 +57,6 @@ export class WorkoutProgramEntity {
     type: 'varchar',
     length: 20,
     default: ProgramStatus.DRAFT,
-    check: "status IN ('draft', 'active', 'paused', 'completed', 'archived')",
   })
   status: ProgramStatus;
 
@@ -79,4 +80,3 @@ export class WorkoutProgramEntity {
   @OneToMany(() => MicrocycleEntity, (microcycle) => microcycle.program, { cascade: true })
   microcycles: MicrocycleEntity[];
 }
-

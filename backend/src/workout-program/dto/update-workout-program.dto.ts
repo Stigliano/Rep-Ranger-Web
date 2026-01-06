@@ -6,4 +6,3 @@ import { CreateWorkoutProgramDto } from './create-workout-program.dto';
  * Tutti i campi sono opzionali
  */
 export class UpdateWorkoutProgramDto extends PartialType(CreateWorkoutProgramDto) {}
-

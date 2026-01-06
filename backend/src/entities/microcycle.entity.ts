@@ -9,6 +9,7 @@ import {
   JoinColumn,
   Index,
   Unique,
+  Check,
 } from 'typeorm';
 import { WorkoutProgramEntity } from './workout-program.entity';
 import { WorkoutSessionEntity } from './workout-session.entity';
@@ -21,6 +22,7 @@ import { WorkoutSessionEntity } from './workout-session.entity';
 @Index(['programId'])
 @Index(['programId', 'orderIndex'])
 @Unique(['programId', 'orderIndex'])
+@Check(`"duration_weeks" >= 1 AND "duration_weeks" <= 4`)
 export class MicrocycleEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -34,7 +36,6 @@ export class MicrocycleEntity {
   @Column({
     type: 'integer',
     name: 'duration_weeks',
-    check: 'duration_weeks >= 1 AND duration_weeks <= 4',
   })
   durationWeeks: number;
 
@@ -63,4 +64,3 @@ export class MicrocycleEntity {
   @OneToMany(() => WorkoutSessionEntity, (session) => session.microcycle, { cascade: true })
   sessions: WorkoutSessionEntity[];
 }
-

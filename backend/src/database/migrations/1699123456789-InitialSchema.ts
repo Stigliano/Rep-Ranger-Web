@@ -444,4 +444,3 @@ export class InitialSchema1699123456789 implements MigrationInterface {
     await queryRunner.dropTable('users', true);
   }
 }
-

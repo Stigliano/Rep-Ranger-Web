@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './auth.controller';
+import { ProfileController } from './profile.controller';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -27,9 +28,8 @@ import { UserSettingsEntity } from '../entities/user-settings.entity';
       inject: [ConfigService],
     }),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, ProfileController],
   providers: [AuthService, UserService, JwtStrategy, LocalStrategy],
   exports: [AuthService, UserService],
 })
 export class AuthModule {}
-

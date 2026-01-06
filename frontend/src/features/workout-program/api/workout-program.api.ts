@@ -24,6 +24,60 @@ export interface Microcycle {
   notes: string | null;
   createdAt: string;
   updatedAt: string;
+  sessions: WorkoutSession[];
+}
+
+export interface WorkoutSession {
+  id: string;
+  microcycleId: string;
+  name: string;
+  dayOfWeek: number;
+  orderIndex: number;
+  estimatedDurationMinutes: number | null;
+  notes: string | null;
+  status: 'scheduled' | 'in_progress' | 'paused' | 'completed' | 'skipped' | 'archived';
+  exercises: WorkoutExercise[];
+}
+
+export interface WorkoutExercise {
+  id: string;
+  sessionId: string;
+  exerciseId: string;
+  exerciseName?: string;
+  sets: number;
+  reps: number;
+  weightKg: number;
+  rpe: number | null;
+  notes: string | null;
+  orderIndex: number;
+}
+
+export interface CreateWorkoutExerciseDto {
+  exerciseId: string;
+  sets: number;
+  reps: number;
+  weightKg: number;
+  rpe?: number;
+  notes?: string;
+  orderIndex: number;
+}
+
+export interface CreateWorkoutSessionDto {
+  name: string;
+  dayOfWeek: number;
+  orderIndex: number;
+  estimatedDurationMinutes?: number;
+  notes?: string;
+  exercises: CreateWorkoutExerciseDto[];
+}
+
+export interface CreateMicrocycleDto {
+  name: string;
+  durationWeeks: number;
+  orderIndex: number;
+  objectives?: string;
+  notes?: string;
+  sessions: CreateWorkoutSessionDto[];
 }
 
 export interface CreateWorkoutProgramDto {
@@ -31,6 +85,21 @@ export interface CreateWorkoutProgramDto {
   description?: string;
   durationWeeks: number;
   author?: string;
+  microcycles: CreateMicrocycleDto[];
+}
+
+export interface UpdateWorkoutExerciseDto extends Partial<CreateWorkoutExerciseDto> {
+  id?: string;
+}
+
+export interface UpdateWorkoutSessionDto extends Partial<Omit<CreateWorkoutSessionDto, 'exercises'>> {
+  id?: string;
+  exercises?: UpdateWorkoutExerciseDto[];
+}
+
+export interface UpdateMicrocycleDto extends Partial<Omit<CreateMicrocycleDto, 'sessions'>> {
+  id?: string;
+  sessions?: UpdateWorkoutSessionDto[];
 }
 
 export interface UpdateWorkoutProgramDto {
@@ -38,6 +107,7 @@ export interface UpdateWorkoutProgramDto {
   description?: string;
   durationWeeks?: number;
   author?: string;
+  microcycles?: UpdateMicrocycleDto[];
 }
 
 /**
@@ -94,4 +164,3 @@ export const workoutProgramApi = {
     await apiClient.delete(`/workout-programs/${id}`);
   },
 };
-

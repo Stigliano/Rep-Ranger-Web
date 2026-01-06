@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DeepPartial } from 'typeorm';
 import { WorkoutProgramEntity, ProgramStatus } from '../../entities/workout-program.entity';
 
 /**
@@ -20,7 +20,12 @@ export class WorkoutProgramRepository {
   async findByUserId(userId: string): Promise<WorkoutProgramEntity[]> {
     return this.repository.find({
       where: { userId },
-      relations: ['microcycles', 'microcycles.sessions'],
+      relations: [
+        'microcycles',
+        'microcycles.sessions',
+        'microcycles.sessions.exercises',
+        'microcycles.sessions.exercises.exercise',
+      ],
       order: { createdAt: 'DESC' },
     });
   }
@@ -28,39 +33,48 @@ export class WorkoutProgramRepository {
   /**
    * Trova programma per ID e userId
    */
-  async findByIdAndUserId(
-    id: string,
-    userId: string,
-  ): Promise<WorkoutProgramEntity | null> {
+  async findByIdAndUserId(id: string, userId: string): Promise<WorkoutProgramEntity | null> {
     return this.repository.findOne({
       where: { id, userId },
-      relations: ['microcycles', 'microcycles.sessions'],
+      relations: [
+        'microcycles',
+        'microcycles.sessions',
+        'microcycles.sessions.exercises',
+        'microcycles.sessions.exercises.exercise',
+      ],
     });
   }
 
   /**
    * Crea nuovo programma
    */
-  async create(
-    data: Partial<WorkoutProgramEntity>,
-  ): Promise<WorkoutProgramEntity> {
+  async create(data: DeepPartial<WorkoutProgramEntity>): Promise<WorkoutProgramEntity> {
     const program = this.repository.create(data);
     return this.repository.save(program);
   }
 
   /**
    * Aggiorna programma
+   * Supporta aggiornamento profondo (deep update) per relazioni con cascade: true
    */
-  async update(
-    id: string,
-    data: Partial<WorkoutProgramEntity>,
-  ): Promise<WorkoutProgramEntity> {
-    await this.repository.update(id, data);
-    const updated = await this.repository.findOne({ where: { id } });
-    if (!updated) {
-      throw new Error('Programma non trovato dopo aggiornamento');
+  async update(id: string, data: DeepPartial<WorkoutProgramEntity>): Promise<WorkoutProgramEntity> {
+    // Verifica esistenza
+    const existing = await this.repository.findOne({ where: { id } });
+    if (!existing) {
+      throw new Error('Programma non trovato');
     }
-    return updated;
+
+    // Usa preload per fare merge intelligente dei dati, incluse relazioni
+    const toSave = await this.repository.preload({
+      id,
+      ...data,
+    });
+
+    if (!toSave) {
+      throw new Error('Errore durante il merge dei dati');
+    }
+
+    return this.repository.save(toSave);
   }
 
   /**
@@ -76,14 +90,10 @@ export class WorkoutProgramRepository {
   /**
    * Trova programmi per status
    */
-  async findByStatus(
-    userId: string,
-    status: ProgramStatus,
-  ): Promise<WorkoutProgramEntity[]> {
+  async findByStatus(userId: string, status: ProgramStatus): Promise<WorkoutProgramEntity[]> {
     return this.repository.find({
       where: { userId, status },
       order: { createdAt: 'DESC' },
     });
   }
 }
-

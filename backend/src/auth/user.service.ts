@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { UserEntity } from '../entities/user.entity';
 import { UserProfileEntity } from '../entities/user-profile.entity';
 import { UserSettingsEntity } from '../entities/user-settings.entity';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 /**
  * Servizio per gestione utenti
@@ -24,11 +25,7 @@ export class UserService {
   /**
    * Crea un nuovo utente con profilo e settings di default
    */
-  async create(
-    email: string,
-    password: string,
-    name: string,
-  ): Promise<UserEntity> {
+  async create(email: string, password: string, name: string): Promise<UserEntity> {
     // Hash password
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
@@ -81,10 +78,7 @@ export class UserService {
   /**
    * Verifica password
    */
-  async validatePassword(
-    password: string,
-    passwordHash: string,
-  ): Promise<boolean> {
+  async validatePassword(password: string, passwordHash: string): Promise<boolean> {
     return bcrypt.compare(password, passwordHash);
   }
 
@@ -104,5 +98,68 @@ export class UserService {
     const count = await this.userRepository.count({ where: { email } });
     return count > 0;
   }
-}
 
+  /**
+   * Aggiorna profilo utente
+   */
+  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['profile', 'settings'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Utente non trovato');
+    }
+
+    if (!user.profile) {
+      // Se il profilo non esiste (caso raro), lo creiamo
+      const profile = this.profileRepository.create({
+        userId: user.id,
+        name: updateProfileDto.name || user.email,
+        ...updateProfileDto,
+      });
+      await this.profileRepository.save(profile);
+      user.profile = profile;
+    } else {
+      // Aggiorniamo il profilo esistente
+      Object.assign(user.profile, updateProfileDto);
+      await this.profileRepository.save(user.profile);
+    }
+
+    return user;
+  }
+
+  /**
+   * Imposta token reset password
+   */
+  async setResetToken(userId: string, token: string, expiresAt: Date): Promise<void> {
+    await this.userRepository.update(userId, {
+      passwordResetToken: token,
+      passwordResetExpiresAt: expiresAt,
+    });
+  }
+
+  /**
+   * Trova utente tramite token reset
+   */
+  async findByResetToken(token: string): Promise<UserEntity | null> {
+    return this.userRepository.findOne({
+      where: { passwordResetToken: token },
+    });
+  }
+
+  /**
+   * Aggiorna password e rimuove token reset
+   */
+  async updatePassword(userId: string, newPassword: string): Promise<void> {
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(newPassword, saltRounds);
+
+    await this.userRepository.update(userId, {
+      passwordHash,
+      passwordResetToken: null,
+      passwordResetExpiresAt: null,
+    });
+  }
+}

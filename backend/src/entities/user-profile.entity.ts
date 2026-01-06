@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
+  Check,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 
@@ -14,6 +15,10 @@ import { UserEntity } from './user.entity';
  * Conforme a 5_DB_ARCHITECTURE.md sezione 3.1.2
  */
 @Entity('user_profiles')
+@Check(`"gender" IN ('male', 'female', 'other') OR "gender" IS NULL`)
+@Check(
+  `"athlete_level" IN ('beginner', 'intermediate', 'advanced', 'competitive') OR "athlete_level" IS NULL`,
+)
 export class UserProfileEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -31,7 +36,6 @@ export class UserProfileEntity {
     type: 'varchar',
     length: 20,
     nullable: true,
-    check: "gender IN ('male', 'female', 'other')",
   })
   gender: 'male' | 'female' | 'other' | null;
 
@@ -46,7 +50,6 @@ export class UserProfileEntity {
     length: 50,
     nullable: true,
     name: 'athlete_level',
-    check: "athlete_level IN ('beginner', 'intermediate', 'advanced', 'competitive')",
   })
   athleteLevel: 'beginner' | 'intermediate' | 'advanced' | 'competitive' | null;
 
@@ -88,4 +91,3 @@ export class UserProfileEntity {
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: UserEntity;
 }
-
