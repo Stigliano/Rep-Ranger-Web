@@ -75,7 +75,7 @@ resource "google_compute_firewall" "internal" {
   }
 
   source_ranges = ["10.0.0.0/8"]
-  target_tags  = ["internal"]
+  target_tags   = ["internal"]
 
   description = "Allow internal traffic within VPC"
 }

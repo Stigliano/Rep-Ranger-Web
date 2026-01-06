@@ -23,7 +23,7 @@ resource "google_sql_database_instance" "main" {
       enabled                        = var.db_backup_enabled
       start_time                     = var.db_backup_start_time
       point_in_time_recovery_enabled = true
-      transaction_log_retention_days  = 7
+      transaction_log_retention_days = 7
       backup_retention_settings {
         retained_backups = 30
         retention_unit   = "COUNT"
@@ -49,7 +49,7 @@ resource "google_sql_database_instance" "main" {
 
     maintenance_window {
       day          = 7 # Domenica
-      hour         = 4  # 04:00 UTC
+      hour         = 4 # 04:00 UTC
       update_track = "stable"
     }
   }

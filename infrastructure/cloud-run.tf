@@ -5,9 +5,9 @@ resource "google_cloud_run_service" "backend" {
 
   template {
     spec {
-      service_account_name = google_service_account.backend.email
+      service_account_name  = google_service_account.backend.email
       container_concurrency = 80
-      timeout_seconds      = 300
+      timeout_seconds       = 300
 
       containers {
         image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.main.repository_id}/backend:latest"
@@ -90,7 +90,7 @@ resource "google_cloud_run_service" "backend" {
         "autoscaling.knative.dev/maxScale" = "10"
         "run.googleapis.com/cloudsql-instances" = google_sql_database_instance.main.connection_name
         "run.googleapis.com/vpc-access-connector" = google_vpc_access_connector.main.name
-        "run.googleapis.com/vpc-access-egress"   = "private-ranges-only"
+        "run.googleapis.com/vpc-access-egress"    = "private-ranges-only"
       }
     }
   }
@@ -112,9 +112,9 @@ resource "google_cloud_run_service" "frontend" {
 
   template {
     spec {
-      service_account_name = google_service_account.frontend.email
+      service_account_name  = google_service_account.frontend.email
       container_concurrency = 80
-      timeout_seconds      = 60
+      timeout_seconds       = 60
 
       containers {
         image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.main.repository_id}/frontend:latest"
