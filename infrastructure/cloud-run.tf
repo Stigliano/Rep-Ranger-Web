@@ -86,11 +86,11 @@ resource "google_cloud_run_service" "backend" {
 
     metadata {
       annotations = {
-        "autoscaling.knative.dev/minScale"          = "1"
-        "autoscaling.knative.dev/maxScale"          = "10"
-        "run.googleapis.com/cloudsql-instances"     = google_sql_database_instance.main.connection_name
-        "run.googleapis.com/vpc-access-connector"   = google_vpc_access_connector.main.name
-        "run.googleapis.com/vpc-access-egress"      = "private-ranges-only"
+        "autoscaling.knative.dev/minScale"        = "1"
+        "autoscaling.knative.dev/maxScale"        = "10"
+        "run.googleapis.com/cloudsql-instances"   = google_sql_database_instance.main.connection_name
+        "run.googleapis.com/vpc-access-connector" = google_vpc_access_connector.main.name
+        "run.googleapis.com/vpc-access-egress"    = "private-ranges-only"
       }
     }
   }
@@ -187,4 +187,3 @@ resource "google_vpc_access_connector" "main" {
   max_instances = 3
   machine_type  = "e2-micro"
 }
-
