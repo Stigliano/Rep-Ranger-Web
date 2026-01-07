@@ -15,7 +15,7 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
     - **STATUS**: Completato. Infrastruttura base operativa (DB, Storage, Cloud Run con immagine placeholder).
     - **IMPORTANTE**: I secret su GCP sono stati inizializzati con valori placeholder. È necessario eseguire lo script `./scripts/update-secrets.ps1` per impostare le password reali.
 - [ ] Deploy Applicazione
-    - **STATUS**: In corso. Fix iterativi linting: rinominato prop `analysis` in `_analysis` in AvatarVisualizer.tsx poiché inutilizzata dopo il commento di `_getColor`.
+    - **STATUS**: In corso. Fix iterativi linting: rimosso completamente prop `analysis` dalla firma di `AvatarVisualizer` in quanto il prefisso `_` non era sufficiente per la configurazione ESLint attuale.
     - **NOTA**: Utilizzata immagine placeholder ("hello world") per sbloccare la creazione di Cloud Run. Il deploy applicativo vero sovrascriverà l'immagine.
 
 ## Dettagli Tecnici Rilevati
