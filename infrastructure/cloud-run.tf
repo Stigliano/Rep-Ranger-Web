@@ -7,15 +7,16 @@ resource "google_cloud_run_service" "backend" {
     spec {
       service_account_name  = google_service_account.backend.email
       container_concurrency = 80
-      timeout_seconds       = 300
+      timeout_seconds       = 600
 
       containers {
         # image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.main.repository_id}/backend:latest"
         image = "us-docker.pkg.dev/cloudrun/container/hello" # Placeholder per primo deploy
 
-        ports {
-          container_port = 3000
-        }
+        # NOTA: Rimuoviamo la porta esplicita per lasciare che Cloud Run inietti la PORT
+        # ports {
+        #   container_port = 3000
+        # }
 
         env {
           name  = "NODE_ENV"
@@ -82,6 +83,17 @@ resource "google_cloud_run_service" "backend" {
             cpu    = "1"
             memory = "1Gi"
           }
+        }
+        
+        # Aggiungiamo probe TCP esplicito (opzionale, ma aiuta il debug)
+        startup_probe {
+          tcp_socket {
+            port = 3000 # La nostra app ascolta qui
+          }
+          initial_delay_seconds = 10
+          timeout_seconds       = 5
+          period_seconds        = 5
+          failure_threshold     = 10
         }
       }
     }
