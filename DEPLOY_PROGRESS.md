@@ -17,9 +17,11 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - [ ] Deploy Applicazione
     - **STATUS**: Parziale.
         - **Frontend**: ✅ Completato con successo.
-        - **Backend**: ❌ Fallito startup.
-    - **CAUSA**: Il backend non riesce a connettersi al database perché i secret su GCP sono ancora quelli "placeholder" creati inizialmente da Terraform.
-    - **SOLUZIONE**: Eseguire lo script locale `./scripts/update-secrets.ps1` per iniettare le password reali.
+        - **Backend**: ❌ Fallito startup (Port Binding).
+    - **CAUSA**: Il container ascoltava su localhost invece di 0.0.0.0. (Log: `failed to start and listen on the port`).
+    - **SOLUZIONE**:
+        1. Fix applicato: Binding su 0.0.0.0 e rimozione healthcheck interno.
+        2. Da verificare: Connessione DB (secret placeholder).
 
 ## Dettagli Tecnici Rilevati
 - **Cloud Provider**: Google Cloud Platform (GCP)
