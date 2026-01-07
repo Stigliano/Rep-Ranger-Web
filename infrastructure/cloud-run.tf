@@ -101,7 +101,8 @@ resource "google_cloud_run_service" "backend" {
   }
 
   depends_on = [
-    google_vpc_access_connector.main
+    google_vpc_access_connector.main,
+    google_project_service.cloud_run
   ]
 }
 
@@ -158,6 +159,10 @@ resource "google_cloud_run_service" "frontend" {
     percent         = 100
     latest_revision = true
   }
+
+  depends_on = [
+    google_project_service.cloud_run
+  ]
 }
 
 # IAM: Permettere accesso pubblico al backend (o configurare autenticazione)
