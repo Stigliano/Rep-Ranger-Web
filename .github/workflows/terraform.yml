@@ -25,10 +25,21 @@ jobs:
     defaults:
       run:
         working-directory: ./infrastructure
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/6911179946/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          service_account: 'github-actions-sa@raprenger-web.iam.gserviceaccount.com'
+          token_format: 'access_token'
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

@@ -7,7 +7,7 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - [x] Analisi codebase iniziale
 - [x] Individuazione infrastruttura Terraform (GCP)
 - [ ] Verifica configurazione GitHub Actions
-    - **STATUS**: Risolti problemi di autenticazione e conflitti di risorse.
+    - **STATUS**: Risolti problemi di autenticazione in `terraform-validate` e conflitti di risorse.
     - **BACKEND**: Configurato backend GCS remoto.
     - **IMPORT**: Risorse WIF e Service Account importate con successo nello stato remoto.
     - **API**: Abilitate manualmente.
@@ -15,7 +15,7 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - [ ] Setup Progetto GCP (Prerequisito manuale/esterno)
     - **STATUS**: WIF Bootstrap e API Enablement completati.
 - [ ] Deploy Infrastruttura
-    - **STATUS**: Pronto per il deploy completo.
+    - **STATUS**: Bucket GCS creato. Pronto per il deploy.
 - [ ] Deploy Applicazione
 
 ## Dettagli Tecnici Rilevati
@@ -26,5 +26,5 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - **CI/CD**: GitHub Actions
 
 ## Prossimi Passi
-1. Pushare le modifiche a `main.tf` (attivazione backend).
-2. Monitorare la pipeline CI/CD: ora `terraform apply` dovrebbe funzionare senza errori di conflitto.
+1. Monitorare la pipeline CI/CD dopo il fix sull'autenticazione nel job `terraform-validate`.
+2. Verificare che il deploy dell'infrastruttura vada a buon fine.
