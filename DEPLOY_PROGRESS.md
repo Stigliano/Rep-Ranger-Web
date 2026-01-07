@@ -6,18 +6,15 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 ## Stato Attuale
 - [x] Analisi codebase iniziale
 - [x] Individuazione infrastruttura Terraform (GCP)
-- [ ] Verifica configurazione GitHub Actions
-    - **STATUS**: Autenticazione, Backend GCS e Import risorse manuali completati.
-    - **FIX**: Corretto typo in `artifact-registry.tf`.
-    - **PERMESSI**: API Serverless VPC Access abilitata e permessi Owner assegnati.
-    - **IMPORT**: Service Accounts backend/frontend importati nello stato.
-    - **PLAN**: `terraform plan` locale ora ha successo (18 add, 2 change, 0 destroy).
+- [x] Verifica configurazione GitHub Actions
+    - **STATUS**: Autenticazione WIF, Backend GCS e Deploy Infra funzionanti (con correzioni).
 - [ ] Verifica configurazione Docker
 - [ ] Setup Progetto GCP (Prerequisito manuale/esterno)
     - **STATUS**: Pronto.
 - [ ] Deploy Infrastruttura
-    - **STATUS**: In attesa di esecuzione CI/CD finale.
+    - **STATUS**: In corso. Corretti errori IAM, VPC, SQL, KMS, API Dependencies, Port e Image Missing.
 - [ ] Deploy Applicazione
+    - **NOTA**: Utilizzata immagine placeholder ("hello world") per sbloccare la creazione di Cloud Run. Il deploy applicativo vero sovrascriverà l'immagine.
 
 ## Dettagli Tecnici Rilevati
 - **Cloud Provider**: Google Cloud Platform (GCP)
@@ -27,5 +24,6 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - **CI/CD**: GitHub Actions
 
 ## Prossimi Passi
-1. Pushare la correzione del typo in `artifact-registry.tf`.
-2. Monitorare il job `terraform apply` nella CI (dovrebbe finalmente passare).
+1. **Completare Deploy Infrastruttura**: Attendere l'esito dell'ultimo fix (placeholder image).
+2. **Setup Pipeline Applicativa**: Creare workflow per Build & Push Docker image e Deploy su Cloud Run.
+3. **Smoke Test**: Verificare connettività e funzionamento base.

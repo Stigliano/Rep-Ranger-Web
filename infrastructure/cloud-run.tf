@@ -10,7 +10,8 @@ resource "google_cloud_run_service" "backend" {
       timeout_seconds       = 300
 
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.main.repository_id}/backend:latest"
+        # image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.main.repository_id}/backend:latest"
+        image = "us-docker.pkg.dev/cloudrun/container/hello" # Placeholder per primo deploy
 
         ports {
           container_port = 3000
@@ -105,6 +106,12 @@ resource "google_cloud_run_service" "backend" {
     google_vpc_access_connector.main,
     google_project_service.cloud_run
   ]
+
+  lifecycle {
+    ignore_changes = [
+      template[0].spec[0].containers[0].image
+    ]
+  }
 }
 
 # Cloud Run Service per Frontend
@@ -119,7 +126,8 @@ resource "google_cloud_run_service" "frontend" {
       timeout_seconds       = 60
 
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.main.repository_id}/frontend:latest"
+        # image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.main.repository_id}/frontend:latest"
+        image = "us-docker.pkg.dev/cloudrun/container/hello" # Placeholder per primo deploy
 
         ports {
           container_port = 80
@@ -164,6 +172,12 @@ resource "google_cloud_run_service" "frontend" {
   depends_on = [
     google_project_service.cloud_run
   ]
+
+  lifecycle {
+    ignore_changes = [
+      template[0].spec[0].containers[0].image
+    ]
+  }
 }
 
 # IAM: Permettere accesso pubblico al backend (o configurare autenticazione)
