@@ -15,7 +15,7 @@ on:
 env:
   PROJECT_ID: raprenger-web
   REGION: europe-west1
-  REPOSITORY: rapranger-repo
+  REPOSITORY: rapranger-docker-repo
   IMAGE: backend
 
 jobs:
