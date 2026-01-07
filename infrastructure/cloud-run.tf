@@ -14,9 +14,9 @@ resource "google_cloud_run_service" "backend" {
         image = "us-docker.pkg.dev/cloudrun/container/hello" # Placeholder per primo deploy
 
         # NOTA: Rimuoviamo la porta esplicita per lasciare che Cloud Run inietti la PORT
-        # ports {
-        #   container_port = 3000
-        # }
+        ports {
+          container_port = 3000
+        }
 
         env {
           name  = "NODE_ENV"
@@ -24,10 +24,10 @@ resource "google_cloud_run_service" "backend" {
         }
 
         # PORT is reserved and automatically set by Cloud Run
-        # env {
-        #   name  = "PORT"
-        #   value = "3000"
-        # }
+        env {
+          name  = "PORT"
+          value = "3000"
+        }
 
         env {
           name  = "DB_HOST"
@@ -83,16 +83,6 @@ resource "google_cloud_run_service" "backend" {
             cpu    = "1"
             memory = "1Gi"
           }
-        }
-        # Aggiungiamo probe TCP esplicito (opzionale, ma aiuta il debug)
-        startup_probe {
-          tcp_socket {
-            port = 3000 # La nostra app ascolta qui
-          }
-          initial_delay_seconds = 10
-          timeout_seconds       = 5
-          period_seconds        = 5
-          failure_threshold     = 10
         }
       }
     }
