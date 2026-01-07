@@ -84,7 +84,6 @@ resource "google_cloud_run_service" "backend" {
             memory = "1Gi"
           }
         }
-        
         # Aggiungiamo probe TCP esplicito (opzionale, ma aiuta il debug)
         startup_probe {
           tcp_socket {
