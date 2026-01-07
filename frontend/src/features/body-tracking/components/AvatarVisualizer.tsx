@@ -138,7 +138,7 @@ const generateSideView = (_body: BodyStats) => {
 };
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
-export const AvatarVisualizer: React.FC<AvatarProps> = ({ measurements, gender, view, showGuides, showLabels, analysis }) => {
+export const AvatarVisualizer: React.FC<AvatarProps> = ({ measurements, gender, view, showGuides, showLabels, analysis: _analysis }) => {
   const body = useMemo(() => calcBody(measurements, gender), [measurements, gender]);
   
   // Logic for front and side views is preserved but commented/unused to satisfy linter until fully implemented
