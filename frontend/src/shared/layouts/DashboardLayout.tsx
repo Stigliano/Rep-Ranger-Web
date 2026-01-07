@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/app/store/auth.store';
 import { 
@@ -87,7 +87,7 @@ export function DashboardLayout() {
 
         <div className="absolute bottom-0 w-full p-4 border-t bg-white">
           <Button 
-            variant="outline" 
+            variant="danger" 
             className="w-full flex items-center justify-center space-x-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
             onClick={handleLogout}
           >

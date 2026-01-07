@@ -114,29 +114,30 @@ const calcBody = (m: Record<string, number>, g: Gender): BodyStats => {
   return { y, w, d, headH, gMod, wMod, g };
 };
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-const generateFrontView = (body: BodyStats) => {
-    const { y, w } = body;
-    const cx = 150;
-    const anchors: Record<string, { x: number; y: number }> = {};
-    const setAnchor = (part: string, x: number, yPos: number) => { anchors[part] = { x, y: yPos }; };
+// Logic for front and side views is preserved but commented/unused to satisfy linter until fully implemented
+// /* eslint-disable @typescript-eslint/no-unused-vars */
+// const generateFrontView = (body: BodyStats) => {
+//     const { y, w } = body;
+//     const cx = 150;
+//     const anchors: Record<string, { x: number; y: number }> = {};
+//     const setAnchor = (part: string, x: number, yPos: number) => { anchors[part] = { x, y: yPos }; };
     
-    // Skeleton
-    const head = `M ${cx} ${y.headTop} L ${cx} ${y.headBottom}`; // Dummy
-    setAnchor('neck', cx, y.neckBottom);
-    setAnchor('shoulders', cx + w.shoulder, y.shoulder);
-    setAnchor('chest', cx + w.chest, y.chest);
-    setAnchor('waist', cx + w.waist, y.waist);
+//     // Skeleton
+//     const head = `M ${cx} ${y.headTop} L ${cx} ${y.headBottom}`; // Dummy
+//     setAnchor('neck', cx, y.neckBottom);
+//     setAnchor('shoulders', cx + w.shoulder, y.shoulder);
+//     setAnchor('chest', cx + w.chest, y.chest);
+//     setAnchor('waist', cx + w.waist, y.waist);
     
-    return { head, neck: '', traps: {left:'', right:''}, shoulders: {left:'', right:''}, chest: {left:'', right:''}, abs: '', obliques: {left:'', right:''}, biceps: {left:'', right:''}, forearms: {left:'', right:''}, hands: {left:'', right:''}, quads: {left:'', right:''}, calves: {left:'', right:''}, feet: {left:'', right:''}, anchors };
-};
+//     return { head, neck: '', traps: {left:'', right:''}, shoulders: {left:'', right:''}, chest: {left:'', right:''}, abs: '', obliques: {left:'', right:''}, biceps: {left:'', right:''}, forearms: {left:'', right:''}, hands: {left:'', right:''}, quads: {left:'', right:''}, calves: {left:'', right:''}, feet: {left:'', right:''}, anchors };
+// };
 
-const generateSideView = (_body: BodyStats) => {
-    // const { y, d } = body; // Unused
-    const anchors: Record<string, { x: number; y: number }> = {};
-    return { head: '', neck: '', chest: '', abs: '', glute: '', quads: '', calves: '', feet: '', arm: '', anchors };
-};
-/* eslint-enable @typescript-eslint/no-unused-vars */
+// const generateSideView = (_body: BodyStats) => {
+//     // const { y, d } = body; // Unused
+//     const anchors: Record<string, { x: number; y: number }> = {};
+//     return { head: '', neck: '', chest: '', abs: '', glute: '', quads: '', calves: '', feet: '', arm: '', anchors };
+// };
+// /* eslint-enable @typescript-eslint/no-unused-vars */
 
 export const AvatarVisualizer: React.FC<AvatarProps> = ({ measurements, gender, view, showGuides, showLabels }) => {
   const body = useMemo(() => calcBody(measurements, gender), [measurements, gender]);

@@ -128,7 +128,7 @@ export const BodyTrackingPage: React.FC = () => {
         <div className="space-y-6">
           <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
             <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Progress Photos</h2>
-            <PhotoUpload onUpload={bodyTrackingService.uploadPhoto} />
+            <PhotoUpload onUpload={(file, view, date) => bodyTrackingService.uploadPhoto(file, view, date).then(() => {})} />
             <div className="mt-4 grid grid-cols-3 gap-2">
               {/* Placeholder for gallery */}
               <div className="aspect-square bg-gray-100 rounded-lg"></div>
