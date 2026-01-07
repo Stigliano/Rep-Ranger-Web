@@ -23,6 +23,12 @@ resource "google_cloud_run_service" "backend" {
           value = var.environment
         }
 
+        # Force new revision to unblock deployment
+        env {
+          name  = "CONFIG_VERSION"
+          value = "1"
+        }
+
         # PORT is reserved and automatically set by Cloud Run. 
         # DO NOT SET 'PORT' ENV VAR MANUALLY.
         # Use 'container_port' above to tell Cloud Run which port we are listening on.
