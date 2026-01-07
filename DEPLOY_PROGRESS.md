@@ -7,19 +7,19 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - [x] Analisi codebase iniziale
 - [x] Individuazione infrastruttura Terraform (GCP)
 - [x] Verifica configurazione GitHub Actions
-    - **STATUS**: Autenticazione WIF, Backend GCS e Deploy Infra funzionanti (con correzioni).
-- [ ] Verifica configurazione Docker
+    - **STATUS**: Autenticazione WIF, Backend GCS e Deploy Infra funzionanti.
+- [x] Verifica configurazione Docker
+    - **STATUS**: Build funzionanti.
 - [ ] Setup Progetto GCP (Prerequisito manuale/esterno)
     - **STATUS**: Pronto.
-- [ ] Deploy Infrastruttura
-    - **STATUS**: Completato. Infrastruttura base operativa (DB, Storage, Cloud Run con immagine placeholder).
-    - **IMPORTANTE**: I secret su GCP sono stati inizializzati con valori placeholder. È necessario eseguire lo script `./scripts/update-secrets.ps1` per impostare le password reali.
+- [x] Deploy Infrastruttura
+    - **STATUS**: Completato. Infrastruttura operativa.
 - [ ] Deploy Applicazione
-    - **STATUS**: In corso. Fix Build TypeScript:
-        1. Commentate funzioni unused (`generateFrontView`, `generateSideView`) in AvatarVisualizer.
-        2. Adattato tipo callback `onUpload` in BodyTrackingPage per matchare la promise return type.
-        3. Rimosso import `React` unused e corretto variant "outline" -> "danger" (assunto da contesto classi CSS) in DashboardLayout.
-    - **NOTA**: Utilizzata immagine placeholder ("hello world") per sbloccare la creazione di Cloud Run. Il deploy applicativo vero sovrascriverà l'immagine.
+    - **STATUS**: Parziale.
+        - **Frontend**: ✅ Completato con successo.
+        - **Backend**: ❌ Fallito startup.
+    - **CAUSA**: Il backend non riesce a connettersi al database perché i secret su GCP sono ancora quelli "placeholder" creati inizialmente da Terraform.
+    - **SOLUZIONE**: Eseguire lo script locale `./scripts/update-secrets.ps1` per iniettare le password reali.
 
 ## Dettagli Tecnici Rilevati
 - **Cloud Provider**: Google Cloud Platform (GCP)
@@ -29,6 +29,6 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - **CI/CD**: GitHub Actions
 
 ## Prossimi Passi
-1. **Completare Deploy Infrastruttura**: Attendere l'esito dell'ultimo fix (placeholder image).
-2. **Setup Pipeline Applicativa**: Creare workflow per Build & Push Docker image e Deploy su Cloud Run.
+1. **Aggiornare Secret**: Eseguire `./scripts/update-secrets.ps1` da terminale locale (richiede `gcloud` autenticato).
+2. **Rilanciare Workflow**: Rieseguire la GitHub Action "Backend CI/CD" (o fare un push vuoto/revert) per triggerare un nuovo deploy.
 3. **Smoke Test**: Verificare connettività e funzionamento base.
