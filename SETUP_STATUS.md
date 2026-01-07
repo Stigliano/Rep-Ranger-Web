@@ -34,6 +34,11 @@
    - **Timer Recupero**: Componente `RecoveryTimer` implementato e integrato nel flusso.
    - **Validazione**: Regole di validazione (min weights/reps) e feedback visivo implementati.
 
+## ☁️ Ambiente Cloud (GCP)
+- **Frontend**: [Apri Applicazione](https://rapranger-frontend-prod-6911179946.europe-west1.run.app) (Operativo ✅)
+- **Backend**: [API Endpoint](https://rapranger-backend-prod-6911179946.europe-west1.run.app) (In Manutenzione ⚠️ - Aggiornamento Secret richiesto)
+- **Database**: Cloud SQL PostgreSQL (Attivo)
+
 ## 🚀 Utilizzo Rapido
 
 **Avvio Ambiente Completo:**

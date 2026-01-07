@@ -16,12 +16,15 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
     - **STATUS**: Completato. Infrastruttura operativa.
 - [ ] Deploy Applicazione
     - **STATUS**: Parziale.
-        - **Frontend**: ✅ Completato con successo.
-        - **Backend**: ❌ Fallito startup (Port Binding).
-    - **CAUSA**: Il container ascoltava su localhost invece di 0.0.0.0. (Log: `failed to start and listen on the port`).
-    - **SOLUZIONE**:
-        1. Fix applicato: Binding su 0.0.0.0 e rimozione healthcheck interno.
-        2. Da verificare: Connessione DB (secret placeholder).
+        - **Frontend**: ✅ Completato con successo. Disponibile a: `https://rapranger-frontend-prod-6911179946.europe-west1.run.app`
+        - **Backend**: ❌ Fallito startup. URL: `https://rapranger-backend-prod-6911179946.europe-west1.run.app`
+    - **ERRORE**: `The user-provided container failed to start and listen on the port defined provided by the PORT=3000... Default STARTUP TCP probe failed`
+    - **CAUSA PROBABILE**:
+        1. **Secret DB**: La password nel Secret Manager è "placeholder". L'applicazione crasha all'avvio tentando di connettersi al database, quindi non apre la porta 3000 in tempo per il probe di Cloud Run.
+    - **SOLUZIONE RICHIESTA**:
+        1. Recuperare la password del DB di produzione (o resettarla).
+        2. Eseguire `./scripts/update-secrets.ps1` per aggiornare i Secret su GCP.
+        3. Rilanciare il deploy (commit vuoto o re-run workflow).
 
 ## Dettagli Tecnici Rilevati
 - **Cloud Provider**: Google Cloud Platform (GCP)
