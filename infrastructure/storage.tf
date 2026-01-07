@@ -74,3 +74,13 @@ resource "google_storage_bucket_iam_member" "backend_storage_access" {
   member = "serviceAccount:${google_service_account.backend.email}"
 }
 
+# Data source per ottenere il Service Account di Cloud Storage
+data "google_storage_project_service_account" "gcs_account" {
+}
+
+# IAM binding: Permettere al Service Agent di Storage di usare la chiave KMS
+resource "google_kms_crypto_key_iam_member" "gcs_key_user" {
+  crypto_key_id = google_kms_crypto_key.storage_key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+}

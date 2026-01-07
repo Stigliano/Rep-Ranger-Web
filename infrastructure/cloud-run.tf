@@ -178,7 +178,7 @@ resource "google_cloud_run_service_iam_member" "frontend_public" {
 
 # VPC Access Connector per Cloud Run (per connettersi a Cloud SQL via Private IP)
 resource "google_vpc_access_connector" "main" {
-  name          = "rapranger-vpc-connector-${var.environment}"
+  name          = "rapranger-conn-${var.environment}"
   region        = var.region
   network       = google_compute_network.main.name
   ip_cidr_range = "10.8.0.0/28"

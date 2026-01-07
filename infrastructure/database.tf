@@ -35,11 +35,6 @@ resource "google_sql_database_instance" "main" {
       value = "100"
     }
 
-    database_flags {
-      name  = "shared_buffers"
-      value = "256MB"
-    }
-
     insights_config {
       query_insights_enabled  = true
       query_string_length     = 1024
