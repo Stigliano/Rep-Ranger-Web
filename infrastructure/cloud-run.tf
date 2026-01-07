@@ -21,10 +21,11 @@ resource "google_cloud_run_service" "backend" {
           value = var.environment
         }
 
-        env {
-          name  = "PORT"
-          value = "3000"
-        }
+        # PORT is reserved and automatically set by Cloud Run
+        # env {
+        #   name  = "PORT"
+        #   value = "3000"
+        # }
 
         env {
           name  = "DB_HOST"
