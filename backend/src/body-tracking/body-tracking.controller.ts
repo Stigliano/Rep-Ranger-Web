@@ -18,14 +18,14 @@ export class BodyTrackingController {
   }
 
   @Get('history')
-  async getHistory(@Request() _req) {
+  async getHistory() {
     // const userId = req.user.id;
     const userId = 'temp-user-id';
     return this.bodyTrackingService.getHistory(userId);
   }
 
   @Get('config')
-  async getConfig(@Request() _req) {
+  async getConfig() {
     // const userId = req.user.id;
     const userId = 'temp-user-id';
     return this.bodyTrackingService.getConfig(userId);
