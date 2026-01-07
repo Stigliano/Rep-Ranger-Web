@@ -49,6 +49,10 @@ resource "google_storage_bucket" "user_files" {
     response_header = ["Content-Type", "Access-Control-Allow-Origin"]
     max_age_seconds = 3600
   }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.gcs_key_user
+  ]
 }
 
 # KMS Key per encryption storage

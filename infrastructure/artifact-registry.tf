@@ -12,6 +12,10 @@ resource "google_artifact_registry_repository_iam_member" "cloud_build" {
   location   = google_artifact_registry_repository.main.location
   role       = "roles/artifactregistry.writer"
   member     = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+
+  depends_on = [
+    google_project_service.cloud_build
+  ]
 }
 
 data "google_project" "project" {
