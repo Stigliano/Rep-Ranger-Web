@@ -149,13 +149,13 @@ export const AvatarVisualizer: React.FC<AvatarProps> = ({ measurements, gender, 
   const cx = 150;
 
   // Unused color logic
-  const _getColor = (part: string) => {
-    const item = analysis?.find(a => a.part === part);
-    if (!item) return '#d1d5db';
-    if (item.status === 'optimal') return '#22c55e';
-    if (item.status === 'under') return '#3b82f6';
-    return '#f59e0b';
-  };
+  // const _getColor = (part: string) => {
+  //   const item = analysis?.find(a => a.part === part);
+  //   if (!item) return '#d1d5db';
+  //   if (item.status === 'optimal') return '#22c55e';
+  //   if (item.status === 'under') return '#3b82f6';
+  //   return '#f59e0b';
+  // };
 
   return (
     <svg viewBox="0 0 300 460" style={{ width: '100%', height: '100%' }} preserveAspectRatio="xMidYMid meet">

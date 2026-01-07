@@ -1,5 +1,6 @@
 // Mock service - in production this would use axios/fetch
 export const bodyTrackingService = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getAnalysis: async (_gender: 'male' | 'female') => {
     // Mock response
     return new Promise((resolve) => {
