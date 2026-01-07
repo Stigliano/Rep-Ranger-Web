@@ -12,8 +12,10 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - [ ] Setup Progetto GCP (Prerequisito manuale/esterno)
     - **STATUS**: Pronto.
 - [ ] Deploy Infrastruttura
-    - **STATUS**: In corso. Corretti errori IAM, VPC, SQL, KMS, API Dependencies, Port e Image Missing.
+    - **STATUS**: Completato. Infrastruttura base operativa (DB, Storage, Cloud Run con immagine placeholder).
+    - **IMPORTANTE**: I secret su GCP sono stati inizializzati con valori placeholder. È necessario eseguire lo script `./scripts/update-secrets.ps1` per impostare le password reali.
 - [ ] Deploy Applicazione
+    - **STATUS**: In preparazione. Configurazione CI/CD aggiornata. Dockerfile in revisione.
     - **NOTA**: Utilizzata immagine placeholder ("hello world") per sbloccare la creazione di Cloud Run. Il deploy applicativo vero sovrascriverà l'immagine.
 
 ## Dettagli Tecnici Rilevati

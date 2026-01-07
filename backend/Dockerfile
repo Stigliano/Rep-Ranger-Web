@@ -8,8 +8,8 @@ COPY package*.json ./
 COPY tsconfig.json ./
 COPY nest-cli.json ./
 
-# Installa dipendenze
-RUN npm ci --only=production && npm cache clean --force
+# Installa dipendenze (incluse devDependencies per la build)
+RUN npm ci && npm cache clean --force
 
 # Copia codice sorgente
 COPY . .
