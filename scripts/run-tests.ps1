@@ -30,7 +30,7 @@ $BackendPath = "C:\Users\d.stigliano\TrainLog\RepRanger web\backend"
 $FrontendPath = "C:\Users\d.stigliano\TrainLog\RepRanger web\frontend"
 
 # Funzione helper per eseguire comandi in una directory specifica
-function Run-TestCommand {
+function Invoke-TestCommand {
     param (
         [string]$Path,
         [string]$Command,
@@ -85,32 +85,32 @@ if (-not $TestType) {
 # Esecuzione in base al tipo selezionato
 switch ($TestType) {
     "BackendUnit" {
-        Run-TestCommand -Path $BackendPath -Command "npm run test" -Description "Backend Unit Tests"
+        Invoke-TestCommand -Path $BackendPath -Command "npm run test" -Description "Backend Unit Tests"
     }
     
     "BackendE2E" {
-        Run-TestCommand -Path $BackendPath -Command "npm run test:e2e" -Description "Backend E2E Tests"
+        Invoke-TestCommand -Path $BackendPath -Command "npm run test:e2e" -Description "Backend E2E Tests"
     }
     
     "FrontendUnit" {
-        Run-TestCommand -Path $FrontendPath -Command "npm run test" -Description "Frontend Unit Tests"
+        Invoke-TestCommand -Path $FrontendPath -Command "npm run test" -Description "Frontend Unit Tests"
     }
     
     "ManualAuth" {
         Write-Warning "Assicurati che il server backend sia attivo su http://localhost:3000"
         # Usiamo npx ts-node per eseguire il file TS senza compilarlo
-        Run-TestCommand -Path $BackendPath -Command "npx ts-node test/manual/auth-profile-flow.ts" -Description "Manual Auth Test"
+        Invoke-TestCommand -Path $BackendPath -Command "npx ts-node test/manual/auth-profile-flow.ts" -Description "Manual Auth Test"
     }
     
     "ManualProgram" {
         Write-Warning "Assicurati che il server backend sia attivo su http://localhost:3000"
-        Run-TestCommand -Path $BackendPath -Command "npx ts-node test/manual/create-program-test.ts" -Description "Manual Create Program Test"
+        Invoke-TestCommand -Path $BackendPath -Command "npx ts-node test/manual/create-program-test.ts" -Description "Manual Create Program Test"
     }
     
     "All" {
-        Run-TestCommand -Path $BackendPath -Command "npm run test" -Description "Backend Unit Tests"
-        Run-TestCommand -Path $BackendPath -Command "npm run test:e2e" -Description "Backend E2E Tests"
-        Run-TestCommand -Path $FrontendPath -Command "npm run test" -Description "Frontend Unit Tests"
+        Invoke-TestCommand -Path $BackendPath -Command "npm run test" -Description "Backend Unit Tests"
+        Invoke-TestCommand -Path $BackendPath -Command "npm run test:e2e" -Description "Backend E2E Tests"
+        Invoke-TestCommand -Path $FrontendPath -Command "npm run test" -Description "Frontend Unit Tests"
     }
 }
 

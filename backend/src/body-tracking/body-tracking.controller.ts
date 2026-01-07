@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Request, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Query } from '@nestjs/common';
 import { BodyTrackingService } from './body-tracking.service';
 import { CreateBodyMetricDto } from './dto/create-body-metric.dto';
 import { UpdateBodyTrackingConfigDto } from './dto/update-config.dto';
@@ -11,7 +11,7 @@ export class BodyTrackingController {
   constructor(private readonly bodyTrackingService: BodyTrackingService) {}
 
   @Post()
-  async create(@Request() _req, @Body() createDto: CreateBodyMetricDto) {
+  async create(@Body() createDto: CreateBodyMetricDto) {
     // const userId = req.user.id;
     const userId = 'temp-user-id'; // Mock for now
     return this.bodyTrackingService.createMetric(userId, createDto);
@@ -32,14 +32,14 @@ export class BodyTrackingController {
   }
 
   @Put('config')
-  async updateConfig(@Request() _req, @Body() updateDto: UpdateBodyTrackingConfigDto) {
+  async updateConfig(@Body() updateDto: UpdateBodyTrackingConfigDto) {
     // const userId = req.user.id;
     const userId = 'temp-user-id';
     return this.bodyTrackingService.updateConfig(userId, updateDto);
   }
 
   @Get('analysis')
-  async getAnalysis(@Request() _req, @Query('gender') gender: 'male' | 'female') {
+  async getAnalysis(@Query('gender') gender: 'male' | 'female') {
     // const userId = req.user.id;
     // const gender = req.user.profile.gender || 'male'; // Real implementation
     const userId = 'temp-user-id';
