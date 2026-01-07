@@ -14,9 +14,9 @@ resource "google_cloud_run_service" "backend" {
         image = "us-docker.pkg.dev/cloudrun/container/hello" # Placeholder per primo deploy
 
         # NOTA: Rimuoviamo la porta esplicita per lasciare che Cloud Run inietti la PORT
-        ports {
-          container_port = 3000
-        }
+        # ports {
+        #   container_port = 3000
+        # }
 
         env {
           name  = "NODE_ENV"
@@ -26,7 +26,7 @@ resource "google_cloud_run_service" "backend" {
         # Force new revision to unblock deployment
         env {
           name  = "CONFIG_VERSION"
-          value = "1"
+          value = "2"
         }
 
         # PORT is reserved and automatically set by Cloud Run. 
