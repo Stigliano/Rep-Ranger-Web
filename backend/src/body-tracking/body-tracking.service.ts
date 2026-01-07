@@ -1,11 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BodyMetric } from '../entities/body-metric.entity';
 import { BodyTrackingConfig } from '../entities/body-tracking-config.entity';
 import { CreateBodyMetricDto } from './dto/create-body-metric.dto';
 import { UpdateBodyTrackingConfigDto } from './dto/update-config.dto';
-import { User } from '../entities/user.entity';
 
 @Injectable()
 export class BodyTrackingService {

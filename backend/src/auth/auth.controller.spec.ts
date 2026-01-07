@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService, LoginResponse } from './auth.service';
 import { UserService } from './user.service';
@@ -14,7 +13,7 @@ import { UserSettingsEntity } from '../entities/user-settings.entity';
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: jest.Mocked<AuthService>;
-  let userService: jest.Mocked<UserService>;
+  // let userService: jest.Mocked<UserService>;
 
   // Mock dati per i test
   const mockUser: UserEntity = {
@@ -77,7 +76,7 @@ describe('AuthController', () => {
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get(AuthService);
-    userService = module.get(UserService);
+    // userService = module.get(UserService);
   });
 
   afterEach(() => {

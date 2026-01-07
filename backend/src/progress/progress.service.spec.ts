@@ -78,7 +78,7 @@ describe('ProgressService', () => {
       // Volume: 105*5 = 525. Reps: 5. Intensity: 105.
       // (Note: week grouping might separate them, checking structure)
       expect(stats.weeklyVolume).toBeDefined();
-      const recentWeek = stats.weeklyVolume.find(w => w.volume > 0);
+      // const recentWeek = stats.weeklyVolume.find(w => w.volume > 0);
       // Depending on exact week, but we expect data.
 
       // Check PRs
