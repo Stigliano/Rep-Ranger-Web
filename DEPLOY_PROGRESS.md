@@ -7,13 +7,15 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - [x] Analisi codebase iniziale
 - [x] Individuazione infrastruttura Terraform (GCP)
 - [ ] Verifica configurazione GitHub Actions
-    - **STATUS**: Autenticazione WIF configurata e funzionante.
-    - **RISULTATO**: `terraform plan` eseguito con successo.
-    - **ATTENZIONE**: `terraform apply` è stato saltato (skipped). Questo accade spesso se l'environment "production" richiede approvazione manuale su GitHub o se le condizioni `if` non sono soddisfatte, ma qui sembra tutto corretto (`refs/heads/main` e `push`).
+    - **STATUS**: Risolti problemi di autenticazione e conflitti di risorse.
+    - **BACKEND**: Configurato backend GCS remoto.
+    - **IMPORT**: Risorse WIF e Service Account importate con successo nello stato remoto.
+    - **API**: Abilitate manualmente.
 - [ ] Verifica configurazione Docker
 - [ ] Setup Progetto GCP (Prerequisito manuale/esterno)
-    - **STATUS**: WIF Bootstrap completato manualmente.
+    - **STATUS**: WIF Bootstrap e API Enablement completati.
 - [ ] Deploy Infrastruttura
+    - **STATUS**: Pronto per il deploy completo.
 - [ ] Deploy Applicazione
 
 ## Dettagli Tecnici Rilevati
@@ -24,5 +26,5 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
 - **CI/CD**: GitHub Actions
 
 ## Prossimi Passi
-1. Indagare perché `terraform apply` è stato skippato (controllare configurazione Environment su GitHub).
-2. Configurare Environment "production" su GitHub Settings -> Environments se non esiste.
+1. Pushare le modifiche a `main.tf` (attivazione backend).
+2. Monitorare la pipeline CI/CD: ora `terraform apply` dovrebbe funzionare senza errori di conflitto.

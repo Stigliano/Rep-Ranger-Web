@@ -8,11 +8,11 @@ terraform {
     }
   }
 
-  # Backend remoto per stato Terraform (opzionale, può essere configurato dopo)
-  # backend "gcs" {
-  #   bucket = "rapranger-terraform-state"
-  #   prefix = "terraform/state"
-  # }
+  # Backend remoto per stato Terraform
+  backend "gcs" {
+    bucket = "rapranger-terraform-state"
+    prefix = "terraform/state"
+  }
 }
 
 provider "google" {
@@ -20,4 +20,3 @@ provider "google" {
   region  = var.region
   zone    = var.zone
 }
-
