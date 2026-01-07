@@ -4,11 +4,17 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
+  console.log('🚀 Starting application bootstrap...');
   try {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, {
+      logger: ['error', 'warn', 'log', 'debug', 'verbose'], // Abilita tutti i log per debug
+    });
 
     // Global prefix per API
     app.setGlobalPrefix('api');
+
+    console.log('✅ NestFactory created');
+
 
     // Global exception filter
     app.useGlobalFilters(new HttpExceptionFilter());
@@ -32,11 +38,12 @@ async function bootstrap() {
     });
 
     const port = process.env.PORT || 3000;
+    console.log(`🔌 Attempting to listen on port ${port}...`);
     await app.listen(port, '0.0.0.0');
 
     console.log(`Application is running on: http://0.0.0.0:${port}`);
   } catch (error) {
-    console.error('Error starting application:', error);
+    console.error('❌ FATAL ERROR during bootstrap:', error);
     process.exit(1);
   }
 }

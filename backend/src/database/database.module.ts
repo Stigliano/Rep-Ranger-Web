@@ -10,6 +10,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         // Cloud SQL connection via Unix socket (Cloud Run)
         const dbHost = configService.get<string>('DB_HOST');
         const isCloudRun = dbHost?.startsWith('/cloudsql/');
+        
+        console.log(`🔧 Database Config: Host=${dbHost}, IsCloudRun=${isCloudRun}, User=${configService.get<string>('DB_USER')}, DB=${configService.get<string>('DB_NAME')}`);
 
         return {
           type: 'postgres',
