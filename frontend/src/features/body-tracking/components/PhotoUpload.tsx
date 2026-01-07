@@ -69,7 +69,7 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ onUpload }) => {
               <label className="block text-xs font-medium text-gray-500 mb-1">View</label>
               <select 
                 value={view} 
-                onChange={(e) => setView(e.target.value as any)}
+                onChange={(e) => setView(e.target.value as 'front' | 'side' | 'back')}
                 className="w-full border rounded p-2 text-sm"
               >
                 <option value="front">Front</option>

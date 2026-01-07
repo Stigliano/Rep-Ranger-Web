@@ -3,19 +3,22 @@ import { AvatarVisualizer } from '../components/AvatarVisualizer';
 import { MeasurementInput } from '../components/MeasurementInput';
 import { PhotoUpload } from '../components/PhotoUpload';
 import { bodyTrackingService } from '../services/bodyTrackingService';
+import { AnalysisItem, Gender, View } from '../types';
 
 export const BodyTrackingPage: React.FC = () => {
-  const [gender, setGender] = useState<'male' | 'female'>('male');
-  const [view, setView] = useState<'front' | 'side'>('front');
+  const [gender, setGender] = useState<Gender>('male');
+  const [view, setView] = useState<View>('front');
   const [metrics, setMetrics] = useState<Record<string, number>>({
     weight: 78, height: 178, chest: 100, waist: 84, hips: 98, shoulders: 118, bicep: 35, thigh: 58
   });
-  const [analysis, setAnalysis] = useState<any[]>([]);
+  const [analysis, setAnalysis] = useState<AnalysisItem[]>([]);
 
   useEffect(() => {
     // Load initial analysis
-    bodyTrackingService.getAnalysis(gender).then((data: any) => {
-      setAnalysis(data.analysis);
+    bodyTrackingService.getAnalysis(gender).then((data) => {
+      // Ensure data.analysis matches AnalysisItem[]
+      // In a real app we'd validate this, here we cast safely if the service returns matching shape
+      setAnalysis((data as { analysis: AnalysisItem[] }).analysis);
     });
   }, [gender]);
 
@@ -39,7 +42,7 @@ export const BodyTrackingPage: React.FC = () => {
           {['male', 'female'].map(g => (
             <button
               key={g}
-              onClick={() => setGender(g as any)}
+              onClick={() => setGender(g as Gender)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 gender === g ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
@@ -97,7 +100,7 @@ export const BodyTrackingPage: React.FC = () => {
                 {['front', 'side'].map(v => (
                   <button
                     key={v}
-                    onClick={() => setView(v as any)}
+                    onClick={() => setView(v as View)}
                     className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${
                       view === v ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-black'
                     }`}
@@ -151,4 +154,3 @@ export const BodyTrackingPage: React.FC = () => {
     </div>
   );
 };
-

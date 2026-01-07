@@ -21,7 +21,7 @@ export const ActiveWorkoutPage = () => {
   const [timerStart, setTimerStart] = useState<number | null>(null);
 
   // Initialize session data from location or localStorage
-  const [sessionData, setSessionData] = useState<WorkoutSession | null>(() => {
+  const [sessionData] = useState<WorkoutSession | null>(() => {
     if (location.state?.session) {
       return location.state.session;
     }

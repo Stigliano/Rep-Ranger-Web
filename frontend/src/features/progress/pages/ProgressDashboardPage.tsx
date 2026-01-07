@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useProgressStats } from '../api/queries';
 import { VolumeChart } from '../components/VolumeChart';
 import { StatsCards } from '../components/StatsCards';

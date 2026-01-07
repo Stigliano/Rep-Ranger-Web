@@ -1,6 +1,6 @@
 // Mock service - in production this would use axios/fetch
 export const bodyTrackingService = {
-  getAnalysis: async (gender: 'male' | 'female') => {
+  getAnalysis: async (_gender: 'male' | 'female') => {
     // Mock response
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -29,4 +29,3 @@ export const bodyTrackingService = {
     return Promise.resolve({ success: true });
   }
 };
-
