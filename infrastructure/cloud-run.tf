@@ -10,8 +10,8 @@ resource "google_cloud_run_service" "backend" {
       timeout_seconds       = 600
 
       containers {
-        # image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.main.repository_id}/backend:latest"
-        image = "us-docker.pkg.dev/cloudrun/container/hello" # Placeholder per primo deploy
+        image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.main.repository_id}/backend:latest"
+        # image = "us-docker.pkg.dev/cloudrun/container/hello" # Placeholder per primo deploy
 
         # NOTA: Rimuoviamo la porta esplicita per lasciare che Cloud Run inietti la PORT
         # ports {
@@ -135,8 +135,8 @@ resource "google_cloud_run_service" "frontend" {
       timeout_seconds       = 60
 
       containers {
-        # image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.main.repository_id}/frontend:latest"
-        image = "us-docker.pkg.dev/cloudrun/container/hello" # Placeholder per primo deploy
+        image = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.main.repository_id}/frontend:latest"
+        # image = "us-docker.pkg.dev/cloudrun/container/hello" # Placeholder per primo deploy
 
         ports {
           container_port = 80
@@ -149,7 +149,7 @@ resource "google_cloud_run_service" "frontend" {
 
         env {
           name  = "VITE_API_BASE_URL"
-          value = google_cloud_run_service.backend.status[0].url
+          value = "${google_cloud_run_service.backend.status[0].url}/api"
         }
 
         resources {

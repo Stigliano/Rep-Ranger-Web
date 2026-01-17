@@ -6,7 +6,7 @@ import { useAuthStore } from '@/app/store/auth.store';
  * Gestisce autenticazione, errori e timeout
  */
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  baseURL: window.__ENV__?.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -37,8 +37,9 @@ apiClient.interceptors.response.use(
       const refreshToken = useAuthStore.getState().refreshToken;
       if (refreshToken) {
         try {
+          const baseURL = window.__ENV__?.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
           const response = await axios.post(
-            `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'}/auth/refresh`,
+            `${baseURL}/auth/refresh`,
             { refreshToken },
           );
           useAuthStore.getState().updateAccessToken(response.data.accessToken);

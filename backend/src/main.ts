@@ -32,12 +32,16 @@ async function bootstrap() {
     );
 
     // CORS configuration
+    const frontendUrl = process.env.FRONTEND_URL;
     app.enableCors({
-      origin: process.env.FRONTEND_URL || '*',
-      credentials: true,
+      origin: frontendUrl || '*',
+      credentials: !!frontendUrl,
     });
 
+    // IMPORTANTE: Cloud Run inietta la porta via variabile d'ambiente PORT (di solito 8080)
+    // Dobbiamo ascoltare su QUELLA porta, non forzare la 3000, altrimenti il health check fallisce.
     const port = process.env.PORT || 3000;
+    
     console.log(`🔌 Attempting to listen on port ${port}...`);
     await app.listen(port, '0.0.0.0');
 
