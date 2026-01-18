@@ -36,7 +36,7 @@
 
 ## ☁️ Ambiente Cloud (GCP)
 - **Frontend**: [Apri Applicazione](https://rapranger-frontend-prod-6911179946.europe-west1.run.app) (Operativo ✅)
-- **Backend**: [API Endpoint](https://rapranger-backend-prod-6911179946.europe-west1.run.app) (In Manutenzione ⚠️ - Aggiornamento Secret richiesto)
+- **Backend**: [API Endpoint](https://rapranger-backend-prod-6911179946.europe-west1.run.app) (⚠️ **Errore Deploy**: Risponde ancora il container Placeholder/Default)
 - **Database**: Cloud SQL PostgreSQL (Attivo)
 
 ## 🚀 Utilizzo Rapido
@@ -56,8 +56,12 @@
 ./scripts/stop-dev.ps1
 ```
 
-## 📋 Stato Corrente (2026-01-06)
-Funzionalità Core **Allenamento Attivo** implementata e verificata.
+## 📋 Stato Corrente (2026-01-07)
+**Status Deploy**: ⚠️ Parziale/Fallito.
+- Il deploy automatico sembra non aver avuto effetto sul Backend (revisione ferma a 00001).
+- Frontend accessibile ma probabilmente non funzionante oltre il login (manca backend).
+
+Funzionalità Core **Allenamento Attivo** implementata e verificata (Locally).
 - Backend funzionante e testato (E2E Core Flow passed).
 - Frontend arricchito con funzionalità "Pharma-grade" (Resilienza, Validazione, Tracciabilità).
 
