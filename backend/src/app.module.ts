@@ -8,6 +8,7 @@ import { WorkoutProgramModule } from './workout-program/workout-program.module';
 import { ExercisesModule } from './exercises/exercises.module';
 import { TrainingLogModule } from './training-log/training-log.module';
 import { ProgressModule } from './progress/progress.module';
+import { BodyTrackingModule } from './body-tracking/body-tracking.module';
 import { validate } from './common/config/env.validation';
 
 @Module({
@@ -36,6 +37,8 @@ import { validate } from './common/config/env.validation';
     TrainingLogModule,
     // Progress module
     ProgressModule,
+    // Body Tracking module
+    BodyTrackingModule,
   ],
   controllers: [AppController],
 })
