@@ -105,10 +105,10 @@ export class BodyTrackingService {
 
   private async getLatestMetrics(userId: string): Promise<Record<string, number>> {
     // Get latest metric for each type
-    // This could be optimized with a custom query
     const metrics = await this.bodyMetricRepository
       .createQueryBuilder('bm')
-      .select('DISTINCT ON (bm.metric_type) bm.metric_type', 'type')
+      .distinctOn(['bm.metric_type'])
+      .select('bm.metric_type', 'type')
       .addSelect('bm.value', 'value')
       .where('bm.user_id = :userId', { userId })
       .orderBy('bm.metric_type')
