@@ -1,49 +1,42 @@
-import { Controller, Get, Post, Put, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Query, UseGuards } from '@nestjs/common';
 import { BodyTrackingService } from './body-tracking.service';
 import { CreateBodyMetricDto } from './dto/create-body-metric.dto';
 import { UpdateBodyTrackingConfigDto } from './dto/update-config.dto';
-// Assuming JwtAuthGuard exists in ../auth/guards/jwt-auth.guard
-// import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { JwtPayload } from '../auth/auth.service';
 
 @Controller('body-metrics')
-// @UseGuards(JwtAuthGuard) // Uncomment when integrating
+@UseGuards(JwtAuthGuard)
 export class BodyTrackingController {
   constructor(private readonly bodyTrackingService: BodyTrackingService) {}
 
   @Post()
-  async create(@Body() createDto: CreateBodyMetricDto) {
-    // const userId = req.user.id;
-    const userId = 'temp-user-id'; // Mock for now
-    return this.bodyTrackingService.createMetric(userId, createDto);
+  async create(@CurrentUser() user: JwtPayload, @Body() createDto: CreateBodyMetricDto) {
+    return this.bodyTrackingService.createMetric(user.sub, createDto);
   }
 
   @Get('history')
-  async getHistory() {
-    // const userId = req.user.id;
-    const userId = 'temp-user-id';
-    return this.bodyTrackingService.getHistory(userId);
+  async getHistory(@CurrentUser() user: JwtPayload) {
+    return this.bodyTrackingService.getHistory(user.sub);
   }
 
   @Get('config')
-  async getConfig() {
-    // const userId = req.user.id;
-    const userId = 'temp-user-id';
-    return this.bodyTrackingService.getConfig(userId);
+  async getConfig(@CurrentUser() user: JwtPayload) {
+    return this.bodyTrackingService.getConfig(user.sub);
   }
 
   @Put('config')
-  async updateConfig(@Body() updateDto: UpdateBodyTrackingConfigDto) {
-    // const userId = req.user.id;
-    const userId = 'temp-user-id';
-    return this.bodyTrackingService.updateConfig(userId, updateDto);
+  async updateConfig(@CurrentUser() user: JwtPayload, @Body() updateDto: UpdateBodyTrackingConfigDto) {
+    return this.bodyTrackingService.updateConfig(user.sub, updateDto);
   }
 
   @Get('analysis')
-  async getAnalysis(@Query('gender') gender: 'male' | 'female') {
-    // const userId = req.user.id;
-    // const gender = req.user.profile.gender || 'male'; // Real implementation
-    const userId = 'temp-user-id';
-    return this.bodyTrackingService.getAnalysis(userId, gender);
+  async getAnalysis(@CurrentUser() user: JwtPayload, @Query('gender') gender: 'male' | 'female') {
+    // Il gender potrebbe essere preso dal profilo utente se disponibile, ma per ora lo manteniamo come parametro query opzionale
+    // o fallback su quello del profilo.
+    // Per ora l'implementazione del service gestisce il default
+    return this.bodyTrackingService.getAnalysis(user.sub, gender);
   }
 }
 

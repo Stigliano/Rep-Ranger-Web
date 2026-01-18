@@ -9,23 +9,54 @@ export const BodyTrackingPage: React.FC = () => {
   const [gender, setGender] = useState<Gender>('male');
   const [view, setView] = useState<View>('front');
   const [metrics, setMetrics] = useState<Record<string, number>>({
-    weight: 78, height: 178, chest: 100, waist: 84, hips: 98, shoulders: 118, bicep: 35, thigh: 58
+    weight: 0, height: 175, chest: 0, waist: 0, hips: 0, shoulders: 0, bicep: 0, thigh: 0
   });
   const [analysis, setAnalysis] = useState<AnalysisItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await bodyTrackingService.getAnalysis(gender);
+      setAnalysis(data.analysis);
+      
+      // Update metrics from analysis data if available
+      const newMetrics = { ...metrics };
+      data.analysis.forEach(item => {
+        if (item.current) {
+          newMetrics[item.part] = item.current;
+        }
+      });
+      setMetrics(newMetrics);
+    } catch (err) {
+      console.error('Failed to load body tracking data', err);
+      setError('Errore durante il caricamento dei dati.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Load initial analysis
-    bodyTrackingService.getAnalysis(gender).then((data) => {
-      // Ensure data.analysis matches AnalysisItem[]
-      // In a real app we'd validate this, here we cast safely if the service returns matching shape
-      setAnalysis((data as { analysis: AnalysisItem[] }).analysis);
-    });
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gender]);
 
-  const handleMetricChange = (key: string, value: number) => {
+  const handleMetricChange = async (key: string, value: number) => {
+    // Optimistic update
     setMetrics(prev => ({ ...prev, [key]: value }));
-    // Debounce save in real app
-    bodyTrackingService.saveMetric(key, value, key === 'weight' ? 'kg' : 'cm');
+    
+    try {
+      await bodyTrackingService.saveMetric(key, value, key === 'weight' ? 'kg' : 'cm');
+      // Reload analysis to update targets and status based on new value
+      const data = await bodyTrackingService.getAnalysis(gender);
+      setAnalysis(data.analysis);
+    } catch (err) {
+      console.error('Failed to save metric', err);
+      // Revert or show error
+      setError('Errore durante il salvataggio della metrica.');
+    }
   };
 
   return (
@@ -53,7 +84,13 @@ export const BodyTrackingPage: React.FC = () => {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr_300px] gap-6">
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-xl border border-red-200">
+          {error}
+        </div>
+      )}
+
+      <div className={`grid grid-cols-1 lg:grid-cols-[350px_1fr_300px] gap-6 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
         {/* LEFT COLUMN: Inputs */}
         <div className="space-y-6">
           <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">

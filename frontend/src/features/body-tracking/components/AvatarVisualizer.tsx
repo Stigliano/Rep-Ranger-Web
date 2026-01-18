@@ -172,10 +172,17 @@ export const AvatarVisualizer: React.FC<AvatarProps> = ({ measurements, gender, 
 
       <rect x="0" y="0" width="300" height="460" fill="transparent" />
 
-      {/* Placeholder for actual SVG paths */}
-      <text x="150" y="230" textAnchor="middle" fill="#666">
-        Avatar Visualization ({view})
-        {showLabels ? ' (Labels On)' : ''}
+      {/* Basic Silhouette Placeholder */}
+      <g opacity="0.1">
+        <path d="M150,40 Q170,40 170,65 Q170,90 150,90 Q130,90 130,65 Q130,40 150,40 Z" fill="#333" />
+        <path d="M150,90 Q180,95 200,110 Q200,160 190,200 L195,300 L180,300 L175,220 Q175,260 175,440 L160,440 L155,300 L145,300 L140,440 L125,440 Q125,260 125,220 L120,300 L105,300 L110,200 Q100,160 100,110 Q120,95 150,90 Z" fill="#333" />
+      </g>
+
+      <text x="150" y="230" textAnchor="middle" fill="#666" fontSize="14">
+        Dynamic Avatar Coming Soon
+      </text>
+      <text x="150" y="250" textAnchor="middle" fill="#999" fontSize="12">
+        {view.toUpperCase()} VIEW {showLabels ? '(Labels On)' : ''}
       </text>
 
       {showGuides && (

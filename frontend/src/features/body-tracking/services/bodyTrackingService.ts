@@ -1,32 +1,38 @@
-// Mock service - in production this would use axios/fetch
+import { apiClient } from '@/shared/lib/api/client';
+import { AnalysisItem } from '../types';
+
+interface AnalysisResponse {
+  method: string;
+  targets: Record<string, number>;
+  analysis: AnalysisItem[];
+}
+
 export const bodyTrackingService = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getAnalysis: async (_gender: 'male' | 'female') => {
-    // Mock response
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          method: 'casey_butt',
-          targets: {
-            chest: 105, shoulders: 125, waist: 78, bicep: 38, forearm: 30, thigh: 60, calf: 40
-          },
-          analysis: [
-            { part: 'chest', ideal: 105, current: 100, deviation: -4.7, status: 'under' },
-            { part: 'waist', ideal: 78, current: 84, deviation: 7.6, status: 'over' },
-            { part: 'bicep', ideal: 38, current: 35, deviation: -7.8, status: 'under' }
-          ]
-        });
-      }, 500);
+  getAnalysis: async (gender: 'male' | 'female'): Promise<AnalysisResponse> => {
+    const response = await apiClient.get<AnalysisResponse>('/body-metrics/analysis', {
+      params: { gender }
     });
+    return response.data;
   },
 
   saveMetric: async (metricType: string, value: number, unit: string) => {
-    console.log('Saving metric', { metricType, value, unit });
-    return Promise.resolve({ success: true });
+    const response = await apiClient.post('/body-metrics', {
+      metricType,
+      value,
+      unit,
+      measuredAt: new Date().toISOString()
+    });
+    return response.data;
+  },
+
+  getHistory: async () => {
+    const response = await apiClient.get('/body-metrics/history');
+    return response.data;
   },
 
   uploadPhoto: async (file: File, view: string, date: string) => {
-    console.log('Uploading photo', { file, view, date });
+    // TODO: Implement backend endpoint for photo upload
+    // Mock implementation for now
     return Promise.resolve({ success: true });
   }
 };

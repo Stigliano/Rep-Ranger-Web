@@ -1,4 +1,4 @@
-# Stato Setup RepRanger - Ambiente Locale
+# Stato Setup RepRanger - Ambiente Locale e Cloud
 
 ## ✅ Completato
 
@@ -13,35 +13,27 @@
    - Migrazioni database eseguite con successo (schema completo)
 
 3. **Backend**:
-   - Avviato su `http://localhost:3000`
-   - Health check OK
-   - Connessione DB verificata
-   - **Recupero Password**: Endpoint attivi e testati (E2E).
-   - **Body Tracking**: Module implementato con Controller, Service e DTO.
-   - **Fix Compilazione**: Risolti errori di importazione UserEntity e typo in BodyTrackingService (2026-01-06).
+   - **Stato**: Operativo (Locale e Produzione)
+   - **Autenticazione**: JWT, Guardie, Registrazione/Login funzionanti e testati.
+   - **Database**: Migrazioni TypeORM sincronizzate con produzione (incluso fix `body_metrics`).
+   - **Body Tracking**: Controller protetto, servizi implementati, integrazione DB completa.
    - **Test Suite**: Backend Unit (36/36) e E2E (12/12) passati.
 
 4. **Frontend**:
-   - Avviato su `http://localhost:5173` (o porta disponibile)
-   - **Autenticazione**: Login, Register, Password Dimenticata, Reset Password completi e funzionanti.
-   - **Dashboard**: Layout strutturato con Sidebar/Navbar e visualizzazione statistiche.
-   - **Body Tracking**: Visualizzatore Avatar SVG, input metriche e upload foto implementati.
-   - Routing configurato e protetto.
-   - **Test Suite**: Unit test passati.
+   - **Stato**: Operativo (Locale e Produzione)
+   - **Autenticazione**: Flussi completi (Register, Login, Password Reset).
+   - **Dashboard**: Accessibile dopo login.
+   - **Body Tracking**: Pagina interattiva connessa al backend reale, caricamento dinamico analisi e metriche.
+   - **Integrazione**: Connesso correttamente al Backend di produzione.
 
-5. **Allenamento Attivo (Frontend)** (2026-01-06):
-   - **Resilienza**: Implementata persistenza automatica su LocalStorage (`active_workout_state`) per prevenire perdita dati.
-   - **Timer Recupero**: Componente `RecoveryTimer` implementato e integrato nel flusso.
-   - **Validazione**: Regole di validazione (min weights/reps) e feedback visivo implementati.
-
-## ☁️ Ambiente Cloud (GCP)
-- **Frontend**: [Apri Applicazione](https://rapranger-frontend-prod-6911179946.europe-west1.run.app) (Operativo ✅)
-- **Backend**: [API Endpoint](https://rapranger-backend-prod-6911179946.europe-west1.run.app) (⚠️ **Errore Deploy**: Risponde ancora il container Placeholder/Default)
-- **Database**: Cloud SQL PostgreSQL (Attivo)
+## ☁️ Ambiente Cloud (GCP) - OPERATIVO (2026-01-18)
+- **Frontend**: [Apri Applicazione](https://rapranger-frontend-prod-6911179946.europe-west1.run.app) (✅ Funzionante)
+- **Backend**: [API Endpoint](https://rapranger-backend-prod-6911179946.europe-west1.run.app) (✅ Funzionante, ver. `00019`)
+- **Database**: Cloud SQL PostgreSQL (✅ Migrato e Sicuro)
 
 ## 🚀 Utilizzo Rapido
 
-**Avvio Ambiente Completo:**
+**Avvio Ambiente Completo Locale:**
 ```powershell
 ./scripts/start-dev.ps1
 ```
@@ -51,27 +43,31 @@
 ./scripts/run-tests.ps1 -TestType All
 ```
 
-**Arresto Ambiente:**
-```powershell
-./scripts/stop-dev.ps1
-```
+## 📋 Stato Corrente (2026-01-18)
+**Status Deploy**: ✅ SUCCESSO COMPLETO.
 
-## 📋 Stato Corrente (2026-01-07)
-**Status Deploy**: ⚠️ Parziale/Fallito.
-- Il deploy automatico sembra non aver avuto effetto sul Backend (revisione ferma a 00001).
-- Frontend accessibile ma probabilmente non funzionante oltre il login (manca backend).
+Dopo una serie di interventi mirati, l'infrastruttura di produzione è pienamente operativa:
+1.  **Backend Deploy**: Risolto errore 404 su root e 500 su auth (guard fix).
+2.  **Database**: Eseguite migrazioni mancanti tramite Cloud SQL Proxy (fix tabella `body_metrics`).
+3.  **Sicurezza**: Database isolato (IP pubblico disabilitato dopo migrazioni).
+4.  **Frontend**: Registrazione e Login testati con successo su ambiente live.
 
-Funzionalità Core **Allenamento Attivo** implementata e verificata (Locally).
-- Backend funzionante e testato (E2E Core Flow passed).
-- Frontend arricchito con funzionalità "Pharma-grade" (Resilienza, Validazione, Tracciabilità).
+## 🔜 Prossimi Passi (Feature Development)
 
-L'applicazione è pronta per l'implementazione delle **Analisi Avanzate**.
+L'infrastruttura è pronta. Il focus si sposta ora sull'implementazione delle feature core mancanti per rendere l'app utilizzabile "sul campo".
 
-## 🔜 Prossimi Passi
+1.  **Gestione Esercizi (Foundation)**:
+    -   Pagina lista esercizi (Backend CRUD già pronto, Frontend da completare).
+    -   Seeding dati iniziali esercizi.
 
-1.  **Dashboard Progressi (`ProgressDashboardPage`)**:
-    -   Visualizzazione grafici volume/intensità.
-    -   Calcolo metriche avanzate (Volume Load, Intensity Factor).
+2.  **Workout Program Builder (Core)**:
+    -   Interfaccia per creare schede di allenamento.
+    -   Logica backend per salvare programmi complessi (Microcicli/Sessioni).
 
-2.  **Testing**:
-    -   Estensione test E2E per coprire casi limite frontend.
+3.  **Active Workout (Core)**:
+    -   Interfaccia "In-Gym" per logging real-time.
+    -   Timer recupero e input set.
+
+4.  **Body Tracking & Progress**:
+    -   ✅ Pagina principale e logica implementata.
+    -   Grafici e visualizzazione progressi (Prossimo step).

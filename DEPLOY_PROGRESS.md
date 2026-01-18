@@ -10,31 +10,54 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
     - **STATUS**: Autenticazione WIF, Backend GCS e Deploy Infra funzionanti.
 - [x] Verifica configurazione Docker
     - **STATUS**: Build funzionanti.
-- [ ] Setup Progetto GCP (Prerequisito manuale/esterno)
-    - **STATUS**: Pronto.
 - [x] Deploy Infrastruttura
     - **STATUS**: Completato. Infrastruttura operativa.
-- [ ] Deploy Applicazione
-    - **STATUS**: ⚠️ Verifica Fallita (2026-01-07).
-        - **Frontend**: ✅ Operativo. URL: `https://rapranger-frontend-prod-6911179946.europe-west1.run.app`
-        - **Backend**: ❌ Offline / Placeholder. URL: `https://rapranger-backend-prod-6911179946.europe-west1.run.app`
-    - **PROBLEMA**: Nonostante il deploy riportato come "successo", l'endpoint `/api/health` continua a restituire la pagina "Congratulations" (Revision `rapranger-backend-prod-00001-p8m`).
-    - **ANALISI (2026-01-17)**:
-        1. **URL API Errato**: Il frontend puntava al backend senza `/api` finale.
-        2. **CORS**: Configurazione `credentials: true` con `origin: '*'` causava errori CORS.
-    - **RISOLUZIONE (2026-01-17)**:
-        - **Backend**: Aggiornato `backend/src/main.ts` per gestire CORS in modo più robusto (credentials condizionale).
-        - **Infrastruttura**: Aggiornato `infrastructure/cloud-run.tf` per correggere `VITE_API_BASE_URL` (aggiunto suffisso `/api`).
-        - **Stato**: Fix applicati, in attesa di redeploy.
+- [x] Deploy Applicazione
+    - **STATUS**: ✅ SUCCESSO (2026-01-18).
+        - **Frontend**: Operativo e collegato al backend.
+        - **Backend**: Operativo, risponde su tutti gli endpoint.
+        - **Database**: Schema completo migrato su Cloud SQL.
 
-## Dettagli Tecnici Rilevati
-- **Cloud Provider**: Google Cloud Platform (GCP)
-- **IaC**: Terraform
-- **Backend**: NestJS (Dockerizzato)
-- **Frontend**: React/Vite (Dockerizzato)
-- **CI/CD**: GitHub Actions
+## Log Risoluzione Problemi (2026-01-18)
 
-## Prossimi Passi
-1. **Push & Deploy**: Committare le modifiche per triggerare la pipeline CI/CD.
-2. **Monitoraggio**: Controllare i log di Cloud Run durante il deployment per verificare che la nuova revisione del backend vada online correttamente.
-3. **Smoke Test Finale**: Verificare login e funzionalità base su ambiente live.
+### 1. Errore 404 su Root `/`
+- **Problema**: Backend rispondeva 404 sulla home page, facendo fallire i health check semplici.
+- **Soluzione**: Aggiunto `AppController` per gestire la route `/`.
+
+### 2. Errore 500 su Auth Guard
+- **Problema**: Endpoint protetti rispondevano 500 invece di 401 Unauthorized.
+- **Soluzione**: Modificato `JwtAuthGuard` per lanciare `UnauthorizedException` corretta.
+
+### 3. Errore Registrazione (Database non migrato)
+- **Problema**: Errore `relation "users" does not exist`. Le migrazioni non erano state eseguite su Cloud SQL.
+- **Analisi**: Migrazione `ExpandBodyMetricsEnum` falliva perché mancava la creazione della tabella `body_metrics`, causando il rollback di tutte le migrazioni precedenti (inclusa creazione users).
+- **Soluzione**:
+    1. Scaricato e configurato Cloud SQL Proxy.
+    2. Creata nuova migrazione `CreateBodyMetricsTable` per fixare la dipendenza mancante.
+    3. Abilitato temporaneamente IP Pubblico su Cloud SQL.
+    4. Eseguite migrazioni manualmente tramite proxy.
+    5. Disabilitato IP Pubblico per sicurezza.
+
+## Stato Feature (Post-Deploy)
+Dall'analisi del codice deployato, lo stato delle feature è avanzato:
+
+1. **Gestione Esercizi**:
+   - Backend Seed: ✅ Eseguito in produzione.
+   - Frontend: ✅ Implementato (`ExercisesPage`, `ExerciseSelector`).
+
+2. **Program Builder**:
+   - Backend: ✅ Implementato.
+   - Frontend: ✅ Implementato (`CreateWorkoutProgramPage`, `MicrocycleEditor`).
+
+3. **Active Workout**:
+   - Backend: ✅ Implementato.
+   - Frontend: ✅ Implementato con persistenza locale e timer recupero.
+
+4. **Body Tracking**:
+   - Backend: ✅ Implementato e Sicuro (API, DB, Auth).
+   - Frontend: ✅ Implementato (Pagina Analisi, Salvataggio Metriche, Avatar).
+
+## Prossimi Passi (QA & Refinement)
+1. **Smoke Test Completo**: Verificare manualmente l'intero flusso utente in produzione.
+2. **Refinement UI/UX**: Migliorare feedback visivo e gestione errori.
+3. **Analytics**: Implementare dashboard progressi (attualmente parziale).

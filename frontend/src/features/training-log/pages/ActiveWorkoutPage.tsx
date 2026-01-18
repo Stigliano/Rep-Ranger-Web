@@ -94,12 +94,7 @@ export const ActiveWorkoutPage = () => {
   }, [watch, sessionData]);
 
   useEffect(() => {
-    // Debug logging
-    console.log('ActiveWorkoutPage mounted');
-    console.log('Location state:', location.state);
-    console.log('Local storage:', localStorage.getItem(LOCAL_STORAGE_KEY));
-    console.log('Session data:', sessionData);
-
+    // Debug info removed for production
     if (!sessionData) {
       // Don't auto-navigate away immediately, show error UI first
       // navigate('/workout-programs');
