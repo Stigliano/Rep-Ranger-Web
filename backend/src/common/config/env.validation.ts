@@ -81,6 +81,13 @@ export class EnvironmentVariables {
  * @returns Configurazione validata
  */
 export function validate(config: Record<string, unknown>) {
+  // Normalize NODE_ENV
+  if (config.NODE_ENV === 'prod') {
+    config.NODE_ENV = 'production';
+  } else if (config.NODE_ENV === 'dev') {
+    config.NODE_ENV = 'development';
+  }
+
   const validatedConfig = plainToInstance(EnvironmentVariables, config, {
     enableImplicitConversion: true,
   });

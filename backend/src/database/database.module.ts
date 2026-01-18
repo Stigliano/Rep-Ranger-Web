@@ -31,6 +31,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           migrations: [__dirname + '/migrations/*{.ts,.js}'],
           synchronize: false, // MAI true in produzione - usa migrazioni
           logging: configService.get<string>('NODE_ENV') === 'development',
+          retryAttempts: 5, // Riprova connessione all'avvio
+          retryDelay: 3000, // Attendi 3 secondi tra i tentativi
           ssl:
             configService.get<string>('NODE_ENV') === 'production' && !isCloudRun
               ? { rejectUnauthorized: false }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 /**
  * Servizio per operazioni database di base
@@ -9,8 +9,8 @@ import { Connection } from 'typeorm';
 @Injectable()
 export class DatabaseService {
   constructor(
-    @InjectConnection()
-    private readonly connection: Connection,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
 
   /**
@@ -18,11 +18,7 @@ export class DatabaseService {
    * @returns true se connesso, false altrimenti
    */
   async isConnected(): Promise<boolean> {
-    try {
-      return this.connection.isConnected;
-    } catch (error) {
-      return false;
-    }
+    return this.dataSource.isInitialized;
   }
 
   /**
@@ -31,7 +27,7 @@ export class DatabaseService {
    */
   async testConnection(): Promise<boolean> {
     try {
-      await this.connection.query('SELECT 1');
+      await this.dataSource.query('SELECT 1');
       return true;
     } catch (error) {
       console.error('Database connection test failed:', error);
@@ -49,9 +45,9 @@ export class DatabaseService {
     driver: string;
   }> {
     return {
-      connected: this.connection.isConnected,
-      database: this.connection.options.database as string,
-      driver: this.connection.options.type,
+      connected: this.dataSource.isInitialized,
+      database: this.dataSource.options.database as string,
+      driver: this.dataSource.options.type,
     };
   }
 }

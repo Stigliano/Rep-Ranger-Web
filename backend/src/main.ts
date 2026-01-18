@@ -5,6 +5,19 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   console.log('🚀 Starting application bootstrap...');
+  
+  // Log Environment details for debugging
+  console.log('----------------------------------------');
+  console.log(`🌍 NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`🔌 PORT: ${process.env.PORT || 3000}`);
+  
+  // Log DB Connection details (Masked)
+  const dbHost = process.env.DB_HOST || 'unknown';
+  const isCloudRun = dbHost.startsWith('/cloudsql/');
+  console.log(`🗄️  DB_HOST: ${isCloudRun ? 'Cloud SQL Socket' : dbHost}`);
+  console.log(`👤 DB_USER: ${process.env.DB_USER || 'unknown'}`);
+  console.log('----------------------------------------');
+
   try {
     const app = await NestFactory.create(AppModule, {
       logger: ['error', 'warn', 'log', 'debug', 'verbose'], // Abilita tutti i log per debug
