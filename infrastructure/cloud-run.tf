@@ -20,7 +20,7 @@ resource "google_cloud_run_service" "backend" {
 
         env {
           name  = "NODE_ENV"
-          value = var.environment
+          value = var.environment == "prod" ? "production" : var.environment
         }
 
         # Force new revision to unblock deployment
