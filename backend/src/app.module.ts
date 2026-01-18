@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AppController } from './app.controller';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
@@ -36,5 +37,6 @@ import { validate } from './common/config/env.validation';
     // Progress module
     ProgressModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

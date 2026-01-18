@@ -24,7 +24,7 @@ async function bootstrap() {
     });
 
     // Global prefix per API
-    app.setGlobalPrefix('api');
+    app.setGlobalPrefix('api', { exclude: ['/'] });
 
     console.log('✅ NestFactory created');
 
