@@ -94,10 +94,17 @@ export const ActiveWorkoutPage = () => {
   }, [watch, sessionData]);
 
   useEffect(() => {
+    // Debug logging
+    console.log('ActiveWorkoutPage mounted');
+    console.log('Location state:', location.state);
+    console.log('Local storage:', localStorage.getItem(LOCAL_STORAGE_KEY));
+    console.log('Session data:', sessionData);
+
     if (!sessionData) {
-      navigate('/workout-programs');
+      // Don't auto-navigate away immediately, show error UI first
+      // navigate('/workout-programs');
     }
-  }, [sessionData, navigate]);
+  }, [sessionData, navigate, location.state]);
 
   const onSubmit = (data: WorkoutLogForm) => {
     createLog.mutate(data, {
@@ -119,7 +126,25 @@ export const ActiveWorkoutPage = () => {
     setTimerStart(Date.now());
   };
 
-  if (!sessionData) return null;
+  if (!sessionData) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen p-4 text-center">
+        <h2 className="text-xl font-bold text-red-600 mb-2">Dati Sessione Mancanti</h2>
+        <p className="text-gray-600 mb-6 max-w-md">
+          Non è stato possibile caricare i dati dell'allenamento. 
+          Assicurati di aver selezionato una sessione dalla lista programmi.
+        </p>
+        <div className="space-y-2">
+            <p className="text-xs text-gray-400 font-mono bg-gray-100 p-2 rounded">
+                Debug info: {JSON.stringify({ hasLocationState: !!location.state, hasStored: !!localStorage.getItem(LOCAL_STORAGE_KEY) })}
+            </p>
+            <Button onClick={() => navigate('/workout-programs')} variant="primary">
+            Torna ai Programmi
+            </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto py-6 px-4 pb-24">
