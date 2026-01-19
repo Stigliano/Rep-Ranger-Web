@@ -9,7 +9,8 @@ import {
   User, 
   LogOut, 
   Menu, 
-  X 
+  X,
+  Scale
 } from 'lucide-react';
 import { Button } from '@/shared/ui';
 
@@ -28,6 +29,7 @@ export function DashboardLayout() {
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/workout-programs', label: 'Programmi', icon: Calendar },
     { path: '/exercises', label: 'Esercizi', icon: Dumbbell },
+    { path: '/body-tracking', label: 'Body Tracker', icon: Scale },
     { path: '/workout-history', label: 'Storico', icon: History },
     { path: '/profile', label: 'Profilo', icon: User },
   ];

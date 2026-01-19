@@ -50,7 +50,9 @@ Dopo una serie di interventi mirati, l'infrastruttura di produzione è pienament
 1.  **Backend Deploy**: Risolto errore 404 su root e 500 su auth (guard fix).
 2.  **Database**: Eseguite migrazioni mancanti tramite Cloud SQL Proxy (fix tabella `body_metrics`).
 3.  **Sicurezza**: Database isolato (IP pubblico disabilitato dopo migrazioni).
-4.  **Frontend**: Registrazione e Login testati con successo su ambiente live.
+5.  **Fix Post-Deploy**:
+    -   Risolto problema routing modulo Body Tracking.
+    -   Corretta query PostgreSQL per analisi metriche.
 
 ## 🔜 Prossimi Passi (Feature Development)
 

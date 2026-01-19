@@ -16,6 +16,7 @@ import { WorkoutHistoryPage } from './features/training-log/pages/WorkoutHistory
 import { ProgramDetailsPage } from './features/workout-program/pages/ProgramDetailsPage';
 import { ProgressDashboardPage } from './features/progress/pages/ProgressDashboardPage';
 import { ProfilePage } from './features/profile/pages/ProfilePage';
+import { BodyTrackingPage } from './features/body-tracking/pages/BodyTrackingPage';
 
 function App() {
   return (
@@ -49,6 +50,8 @@ function App() {
           
           <Route path="/exercises" element={<ExercisesPage />} />
           <Route path="/exercises/new" element={<CreateExercisePage />} />
+
+          <Route path="/body-tracking" element={<BodyTrackingPage />} />
         </Route>
 
         {/* Catch all */}

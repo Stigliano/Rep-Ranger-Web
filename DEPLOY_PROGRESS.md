@@ -38,6 +38,21 @@ Portare l'applicazione RepRanger (Backend + Frontend) online su Google Cloud Pla
     4. Eseguite migrazioni manualmente tramite proxy.
     5. Disabilitato IP Pubblico per sicurezza.
 
+### 4. Errore 404 su Body Tracking API
+- **Problema**: Endpoint `/body-metrics` ritornava 404 dopo il deploy della feature.
+- **Analisi**: `BodyTrackingModule` non era importato in `AppModule`, quindi le route non venivano registrate.
+- **Soluzione**: Aggiunto import mancante in `app.module.ts`.
+
+### 5. Errore 500 su Analisi (Query Syntax)
+- **Problema**: Errore `syntax error at or near "DISTINCT"` durante il recupero dell'analisi.
+- **Analisi**: Sintassi `DISTINCT ON` non standard all'interno di `select()` del QueryBuilder.
+- **Soluzione**: Utilizzato metodo dedicato `.distinctOn(['column'])` di TypeORM.
+
+### 6. Body Tracking non visibile
+- **Problema**: Voce "Body Tracker" mancante nella sidebar.
+- **Analisi**: Pagina implementata ma rotta mancante in `App.tsx` e voce menu assente in `DashboardLayout`.
+- **Soluzione**: Aggiunta rotta e link di navigazione.
+
 ## Stato Feature (Post-Deploy)
 Dall'analisi del codice deployato, lo stato delle feature è avanzato:
 
