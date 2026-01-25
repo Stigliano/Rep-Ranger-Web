@@ -7,6 +7,8 @@
 ## Riepilogo Esecutivo
 Il deploy della versione con i fix (`commit 6908238`) è stato completato con successo lato codice, ma **le migrazioni del database non sono state eseguite**. Di conseguenza, le nuove tabelle non esistono ancora nel database di produzione, causando errori 500 su tutte le operazioni che coinvolgono sessioni e foto.
 
+Un successivo tentativo di deploy (`commit 05f1822`) è fallito a causa della mancanza della dipendenza `dotenv` in produzione, necessaria per l'inizializzazione del `DataSource` durante le migrazioni.
+
 ## Risultati Test Post-Deploy (PowerShell)
 
 ### 1. Endpoint `GET /api/body-metrics` (Risolto ✅)
@@ -29,15 +31,14 @@ Il deploy della versione con i fix (`commit 6908238`) è stato completato con su
 - **Causa:** Tabella mancante.
 
 ## Analisi Causa Radice
-L'analisi della configurazione di deploy (`Dockerfile` e `package.json`) ha rivelato che **non esiste un automatismo per l'esecuzione delle migrazioni** all'avvio del container in produzione.
-- Il comando di avvio è `node dist/main.js`.
-- Le migrazioni richiedono un comando esplicito (es. `typeorm migration:run`).
-- Inoltre, la configurazione attuale di `data-source.ts` punta a file `.ts` (`src/database/migrations/*.ts`), che non sono accessibili o eseguibili direttamente nell'ambiente di produzione compilato.
+1.  **Mancata Esecuzione Migrazioni:** Non esisteva un automatismo per l'esecuzione delle migrazioni all'avvio del container in produzione.
+2.  **Dipendenza Mancante:** Il pacchetto `dotenv` era utilizzato in `data-source.ts` ma non era elencato nelle `dependencies` di `package.json`, causando il fallimento dello script di migrazione in produzione.
 
-## Azioni Correttive Necessarie
-1.  **Aggiornare `data-source.ts`:** Modificare il pattern delle migrazioni per supportare sia `.ts` (sviluppo) che `.js` (produzione).
-2.  **Creare Script Migrazione Prod:** Aggiungere uno script in `package.json` per eseguire le migrazioni usando i file compilati in `dist`.
-3.  **Aggiornare Dockerfile:** Modificare il comando `CMD` per eseguire le migrazioni prima di avviare l'applicazione.
+## Azioni Correttive
+1.  **Aggiornare `data-source.ts`:** Modificato il pattern delle migrazioni per supportare sia `.ts` (sviluppo) che `.js` (produzione). (Completato)
+2.  **Creare Script Migrazione Prod:** Aggiunto script in `package.json` per eseguire le migrazioni usando i file compilati in `dist`. (Completato)
+3.  **Aggiornare Dockerfile:** Modificato il comando `CMD` per eseguire le migrazioni prima di avviare l'applicazione. (Completato)
+4.  **Installare Dipendenza:** Aggiunto `dotenv` alle dipendenze di produzione. (In Corso)
 
 ## Strumenti Utilizzati
 - **PowerShell:** Script `test_production.ps1` per smoke test automatizzati.
