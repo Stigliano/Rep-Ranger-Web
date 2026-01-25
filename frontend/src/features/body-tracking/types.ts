@@ -56,3 +56,12 @@ export interface BodyStats {
   wMod: number;
   g: Gender;
 }
+
+export interface BodyMetric {
+  id: string;
+  metricType: string;
+  value: number;
+  unit: string;
+  measuredAt: string;
+  userId?: string;
+}
