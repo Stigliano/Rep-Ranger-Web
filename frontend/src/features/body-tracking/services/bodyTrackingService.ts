@@ -1,11 +1,5 @@
 import { apiClient } from '@/shared/lib/api/client';
-import { AnalysisItem, BodyTrackingSession } from '../types';
-
-interface AnalysisResponse {
-  method: string;
-  targets: Record<string, number>;
-  analysis: AnalysisItem[];
-}
+import { AnalysisResponse, BodyTrackingSession } from '../types';
 
 export const bodyTrackingService = {
   getAnalysis: async (gender: 'male' | 'female'): Promise<AnalysisResponse> => {

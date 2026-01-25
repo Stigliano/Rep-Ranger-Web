@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Photo, BodyTrackingSession } from '../types';
+import { View, BodyTrackingSession } from '../types';
 import { GhostOverlay } from './GhostOverlay';
 import { bodyTrackingService } from '../services/bodyTrackingService';
 

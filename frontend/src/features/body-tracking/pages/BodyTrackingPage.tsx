@@ -175,7 +175,7 @@ export const BodyTrackingPage: React.FC = () => {
               <AvatarVisualizer 
                 measurements={metrics} 
                 gender={gender} 
-                view={view === 'FRONT' ? 'front' : 'side'} 
+                view={view} 
                 showGuides={true}
                 showLabels={true}
                 analysis={analysis}
