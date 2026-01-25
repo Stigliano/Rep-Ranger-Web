@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { UserEntity } from '../entities/user.entity';
 import { UserProfileEntity } from '../entities/user-profile.entity';
 import { UserSettingsEntity } from '../entities/user-settings.entity';
@@ -49,7 +49,7 @@ export const AppDataSource = new DataSource({
     BodyTrackingConfig,
     BodyProgressPhoto,
   ],
-  migrations: ['src/database/migrations/*.ts'],
+  migrations: [join(__dirname, 'migrations', '*{.ts,.js}')],
   synchronize: false, // MAI true in produzione
   logging: process.env.NODE_ENV === 'development',
 });

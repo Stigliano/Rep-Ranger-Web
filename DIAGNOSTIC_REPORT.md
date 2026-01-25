@@ -1,38 +1,44 @@
 # Report Diagnostico - Modulo Body Tracking
 
 **Data:** 25 Gennaio 2026
-**Ambiente:** Produzione (Fix Implementati in Locale)
+**Ambiente:** Produzione
 **URL:** `https://rapranger-frontend-prod-6911179946.europe-west1.run.app/body-tracking`
 
 ## Riepilogo Esecutivo
-Sono stati implementati i fix per i problemi critici lato **Backend** che impedivano il corretto funzionamento del modulo Body Tracking. È stata creata la migrazione mancante per le tabelle del database e corretto l'endpoint API mancante. Le modifiche sono state verificate localmente tramite script di analisi statica.
+Il deploy della versione con i fix (`commit 6908238`) è stato completato con successo lato codice, ma **le migrazioni del database non sono state eseguite**. Di conseguenza, le nuove tabelle non esistono ancora nel database di produzione, causando errori 500 su tutte le operazioni che coinvolgono sessioni e foto.
 
-## Stato Risoluzione Problemi
+## Risultati Test Post-Deploy (PowerShell)
 
-### 1. Tabelle Database Mancanti (Risolto - In attesa di Deploy)
-È stata creata la migrazione `1767600000003-CreateBodyTrackingSessionsAndLinkPhotos.ts` che:
-- Crea la tabella `body_tracking_sessions`.
-- Aggiunge la colonna `session_id` alla tabella `body_progress_photos`.
-- Imposta le chiavi esterne corrette verso la tabella `users` e tra le sessioni e le foto.
+### 1. Endpoint `GET /api/body-metrics` (Risolto ✅)
+- **Stato:** 200 OK
+- **Esito:** L'endpoint ora risponde correttamente (restituisce array vuoto per nuovi utenti) invece di 404. Questo conferma che il nuovo codice del controller è attivo.
 
-### 2. Inconsistenza Endpoint (Risolto - In attesa di Deploy)
-È stato aggiornato il `BodyTrackingController` per includere l'endpoint `GET /api/body-metrics`.
-- **Modifica:** Aggiunto metodo `getAllMetrics` decorato con `@Get()` che rimanda a `getHistory`.
-- **Risultato:** Le chiamate a `/api/body-metrics` non restituiranno più 404 ma la lista storica delle metriche.
+### 2. Endpoint `GET /api/body-metrics/sessions` (Fallito ❌)
+- **Stato:** 500 Internal Server Error
+- **Errore:** `relation "body_tracking_sessions" does not exist`
+- **Causa:** La migrazione per creare la tabella non è stata eseguita.
 
-## Verifica Locale
-È stato eseguito uno script di verifica PowerShell (`verify_fixes.ps1`) con esito positivo:
-- [PASS] Migration file exists and contains correct table definitions.
-- [PASS] BodyTrackingController has root @Get() endpoint.
+### 3. Endpoint `POST /api/body-metrics/sessions` (Fallito ❌)
+- **Stato:** 500 Internal Server Error
+- **Errore:** `relation "body_tracking_sessions" does not exist`
+- **Causa:** Tabella mancante.
 
-## Prossimi Passi
-1.  **Push & Deploy:** Eseguire il push delle modifiche sul repository remoto per avviare la pipeline di CI/CD.
-2.  **Esecuzione Migrazioni:** Assicurarsi che le migrazioni vengano applicate al database di produzione durante il deploy.
-3.  **Smoke Test:** Una volta in produzione, verificare nuovamente gli endpoint:
-    - `GET /api/body-metrics/photos` (Dovrebbe restituire 200 OK e lista vuota o foto)
-    - `GET /api/body-metrics/sessions` (Dovrebbe restituire 200 OK)
-    - `GET /api/body-metrics` (Dovrebbe restituire 200 OK)
+### 4. Endpoint `GET /api/body-metrics/photos` (Fallito ❌)
+- **Stato:** 500 Internal Server Error
+- **Errore:** `relation "body_progress_photos" does not exist`
+- **Causa:** Tabella mancante.
+
+## Analisi Causa Radice
+L'analisi della configurazione di deploy (`Dockerfile` e `package.json`) ha rivelato che **non esiste un automatismo per l'esecuzione delle migrazioni** all'avvio del container in produzione.
+- Il comando di avvio è `node dist/main.js`.
+- Le migrazioni richiedono un comando esplicito (es. `typeorm migration:run`).
+- Inoltre, la configurazione attuale di `data-source.ts` punta a file `.ts` (`src/database/migrations/*.ts`), che non sono accessibili o eseguibili direttamente nell'ambiente di produzione compilato.
+
+## Azioni Correttive Necessarie
+1.  **Aggiornare `data-source.ts`:** Modificare il pattern delle migrazioni per supportare sia `.ts` (sviluppo) che `.js` (produzione).
+2.  **Creare Script Migrazione Prod:** Aggiungere uno script in `package.json` per eseguire le migrazioni usando i file compilati in `dist`.
+3.  **Aggiornare Dockerfile:** Modificare il comando `CMD` per eseguire le migrazioni prima di avviare l'applicazione.
 
 ## Strumenti Utilizzati
-- **Analisi Codice:** Esame dei file sorgente TypeScript.
-- **Script di Verifica:** `verify_fixes.ps1` per validazione statica delle modifiche.
+- **PowerShell:** Script `test_production.ps1` per smoke test automatizzati.
+- **Analisi Configurazione:** Esame di `Dockerfile` e `package.json`.
