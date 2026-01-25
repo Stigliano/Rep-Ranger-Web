@@ -30,7 +30,7 @@ export const bodyTrackingService = {
     return response.data;
   },
 
-  uploadPhoto: async (file: File, view: string, date: string) => {
+  uploadPhoto: async (_file: File, _view: string, _date: string) => {
     // TODO: Implement backend endpoint for photo upload
     // Mock implementation for now
     return Promise.resolve({ success: true });
