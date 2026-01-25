@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { DataSource } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
 import { resolve, join } from 'path';
 import { UserEntity } from '../entities/user.entity';
@@ -23,14 +23,13 @@ import { BodyProgressPhoto } from '../entities/body-progress-photo.entity';
  */
 dotenv.config({ path: resolve(__dirname, '../../.env') });
 
-/**
- * DataSource per CLI TypeORM (migrazioni)
- * Utilizzato da script npm run migration:*
- */
-export const AppDataSource = new DataSource({
+const dbHost = process.env.DB_HOST || 'localhost';
+const isCloudRun = dbHost.startsWith('/cloudsql/');
+
+console.log(`🔌 DataSource Config: Host=${dbHost}, IsCloudRun=${isCloudRun}`);
+
+const commonOptions: DataSourceOptions = {
   type: 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432', 10),
   username: process.env.DB_USER || 'rapranger_app',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'rapranger',
@@ -53,4 +52,35 @@ export const AppDataSource = new DataSource({
   migrations: [join(__dirname, 'migrations', '*{.ts,.js}')],
   synchronize: false, // MAI true in produzione
   logging: process.env.NODE_ENV === 'development',
-});
+};
+
+let dataSourceOptions: DataSourceOptions;
+
+if (isCloudRun) {
+  // Configurazione specifica per Cloud Run / Cloud SQL via Unix Socket
+  dataSourceOptions = {
+    ...commonOptions,
+    host: dbHost, // Importante: imposta host al socket path
+    extra: {
+      socketPath: dbHost, // Ridondanza per sicurezza per driver pg
+    },
+    ssl: false, // Non serve SSL su socket Unix locale
+  };
+} else {
+  // Configurazione standard TCP
+  dataSourceOptions = {
+    ...commonOptions,
+    host: dbHost,
+    port: parseInt(process.env.DB_PORT || '5432', 10),
+    ssl:
+      process.env.NODE_ENV === 'production'
+        ? { rejectUnauthorized: false }
+        : false,
+  };
+}
+
+/**
+ * DataSource per CLI TypeORM (migrazioni)
+ * Utilizzato da script npm run migration:*
+ */
+export const AppDataSource = new DataSource(dataSourceOptions);
