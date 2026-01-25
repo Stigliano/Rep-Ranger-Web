@@ -24,6 +24,11 @@ export class BodyTrackingController {
     return this.bodyTrackingService.getSessions(user.sub);
   }
 
+  @Get()
+  async getAllMetrics(@CurrentUser() user: JwtPayload) {
+    return this.bodyTrackingService.getHistory(user.sub);
+  }
+
   @Post()
   async create(@CurrentUser() user: JwtPayload, @Body() createDto: CreateBodyMetricDto) {
     return this.bodyTrackingService.createMetric(user.sub, createDto);
