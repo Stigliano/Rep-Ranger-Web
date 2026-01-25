@@ -2,7 +2,7 @@ import { IsString, IsIn, IsDateString, IsOptional } from 'class-validator';
 
 export class UploadPhotoDto {
   @IsString()
-  @IsIn(['front', 'side', 'back'])
+  @IsIn(['FRONT', 'BACK', 'LEFT_SIDE', 'RIGHT_SIDE'])
   viewType: string;
 
   @IsDateString()

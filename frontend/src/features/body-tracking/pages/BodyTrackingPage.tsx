@@ -3,8 +3,10 @@ import { AvatarVisualizer } from '../components/AvatarVisualizer';
 import { MeasurementInput } from '../components/MeasurementInput';
 import { GuidedCaptureWizard } from '../components/GuidedCaptureWizard';
 import { ComparisonGallery } from '../components/ComparisonGallery';
+import { ProgressCharts } from '../components/ProgressCharts';
+import { FullMeasurementEntry } from '../components/FullMeasurementEntry';
 import { bodyTrackingService } from '../services/bodyTrackingService';
-import { AnalysisItem, Gender, View, BodyTrackingSession, BodyCompositionResult } from '../types';
+import { AnalysisItem, Gender, View, BodyTrackingSession, BodyCompositionResult, BodyMetric } from '../types';
 import { MEASUREMENT_CATEGORIES, MEASUREMENT_GUIDELINES } from '../data/measurement-guidelines';
 
 export const BodyTrackingPage: React.FC = () => {
@@ -14,23 +16,27 @@ export const BodyTrackingPage: React.FC = () => {
   const [analysis, setAnalysis] = useState<AnalysisItem[]>([]);
   const [composition, setComposition] = useState<BodyCompositionResult | undefined>(undefined);
   const [sessions, setSessions] = useState<BodyTrackingSession[]>([]);
+  const [history, setHistory] = useState<BodyMetric[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showWizard, setShowWizard] = useState(false);
+  const [showFullEntry, setShowFullEntry] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('general');
 
   const loadData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [analysisData, sessionsData] = await Promise.all([
+      const [analysisData, sessionsData, historyData] = await Promise.all([
         bodyTrackingService.getAnalysis(gender),
-        bodyTrackingService.getSessions()
+        bodyTrackingService.getSessions(),
+        bodyTrackingService.getHistory()
       ]);
       
       setAnalysis(analysisData.analysis);
       setComposition(analysisData.composition);
       setSessions(sessionsData);
+      setHistory(historyData);
       
       // Update metrics from analysis data if available
       const newMetrics = { ...metrics };
@@ -42,17 +48,11 @@ export const BodyTrackingPage: React.FC = () => {
         }
       });
       
-      // Also populate from composition input if available (this logic might need backend support to return raw inputs, 
-      // but for now we rely on what getAnalysis returns in 'analysis' array or we might need a separate 'getLatestMetrics' call if not all metrics are analyzed)
-      // Since getAnalysis only returns analyzed parts, we might miss some raw metrics if they aren't part of the target analysis.
-      // Ideally, we should fetch all latest metrics separately or have getAnalysis return them.
-      // For now, let's assume the user will input them or they persist in local state if edited.
-      // To fix this properly, we'd need getAnalysis to return 'latestMetrics' map.
-      
       setMetrics(newMetrics);
     } catch (err) {
       console.error('Failed to load body tracking data', err);
-      setError('Errore durante il caricamento dei dati.');
+      // More specific error handling could be added here based on error type
+      setError('Errore durante il caricamento dei dati. Riprova più tardi.');
     } finally {
       setLoading(false);
     }
@@ -73,13 +73,35 @@ export const BodyTrackingPage: React.FC = () => {
       await bodyTrackingService.saveMetric(key, value, unit);
       
       // Reload analysis to update targets and status based on new value
-      // Debounce this if possible, but for now direct call
       const data = await bodyTrackingService.getAnalysis(gender);
       setAnalysis(data.analysis);
       setComposition(data.composition);
+      
+      // Refresh history for charts
+      const historyData = await bodyTrackingService.getHistory();
+      setHistory(historyData);
     } catch (err) {
       console.error('Failed to save metric', err);
       setError('Errore durante il salvataggio della metrica.');
+    }
+  };
+
+  const handleFullEntrySave = async (newMetrics: Record<string, number>) => {
+    try {
+      // Save all changed metrics
+      const promises = Object.entries(newMetrics).map(([key, value]) => {
+        if (value !== metrics[key]) {
+          const unit = MEASUREMENT_GUIDELINES[key]?.category === 'skinfold' ? 'mm' : (key === 'weight' ? 'kg' : 'cm');
+          return bodyTrackingService.saveMetric(key, value, unit);
+        }
+        return Promise.resolve();
+      });
+      
+      await Promise.all(promises);
+      await loadData();
+    } catch (err) {
+      console.error('Failed to save full entry', err);
+      throw err; // Let modal handle error state
     }
   };
 
@@ -120,15 +142,24 @@ export const BodyTrackingPage: React.FC = () => {
           <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Misure</h2>
-              <select 
-                value={activeCategory} 
-                onChange={(e) => setActiveCategory(e.target.value)}
-                className="text-sm border-gray-300 rounded-md shadow-sm focus:border-black focus:ring-black"
-              >
-                {MEASUREMENT_CATEGORIES.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.label}</option>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setShowFullEntry(true)}
+                  className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded font-medium transition-colors"
+                  title="Inserimento completo"
+                >
+                  📝 Full
+                </button>
+                <select 
+                  value={activeCategory} 
+                  onChange={(e) => setActiveCategory(e.target.value)}
+                  className="text-sm border-gray-300 rounded-md shadow-sm focus:border-black focus:ring-black"
+                >
+                  {MEASUREMENT_CATEGORIES.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             
             <div className="space-y-1 max-h-[600px] overflow-y-auto pr-2">
@@ -153,7 +184,7 @@ export const BodyTrackingPage: React.FC = () => {
         </div>
 
         {/* MIDDLE COLUMN: Avatar */}
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-6">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex-1 relative min-h-[500px]">
             <div className="absolute top-4 left-4 right-4 flex justify-between z-10">
               <div className="flex bg-gray-100 p-1 rounded-lg">
@@ -182,6 +213,9 @@ export const BodyTrackingPage: React.FC = () => {
               />
             </div>
           </div>
+
+          {/* Progress Charts Section */}
+          <ProgressCharts metrics={history} />
         </div>
 
         {/* RIGHT COLUMN: Actions & Analysis */}
@@ -277,6 +311,15 @@ export const BodyTrackingPage: React.FC = () => {
           }}
           onCancel={() => setShowWizard(false)}
           lastSession={sessions[0]}
+        />
+      )}
+
+      {/* FULL ENTRY MODAL */}
+      {showFullEntry && (
+        <FullMeasurementEntry 
+          initialMetrics={metrics}
+          onSave={handleFullEntrySave}
+          onClose={() => setShowFullEntry(false)}
         />
       )}
     </div>
