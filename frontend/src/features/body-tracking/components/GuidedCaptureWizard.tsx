@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { View, BodyTrackingSession } from '../types';
 import { GhostOverlay } from './GhostOverlay';
 import { bodyTrackingService } from '../services/bodyTrackingService';
@@ -18,31 +18,29 @@ export const GuidedCaptureWizard: React.FC<GuidedCaptureWizardProps> = ({ onComp
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [weight, setWeight] = useState<number | ''>('');
   const [notes, setNotes] = useState('');
-  const [capturedPhotos, setCapturedPhotos] = useState<Record<View, { file: File, url: string, id?: string }>>({} as any);
+  const [capturedPhotos, setCapturedPhotos] = useState<Partial<Record<View, { file: File, url: string, id?: string }>>>({});
   const [isUploading, setIsUploading] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const currentView = CAPTURE_ORDER[currentViewIndex];
 
-  useEffect(() => {
-    if (step === 'capture') {
-      startCamera();
-    } else {
-      stopCamera();
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
-    return () => stopCamera();
-  }, [step]);
+  }, []);
 
-  const startCamera = async () => {
+  const startCamera = useCallback(async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } 
       });
-      setStream(mediaStream);
+      streamRef.current = mediaStream;
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
@@ -51,14 +49,16 @@ export const GuidedCaptureWizard: React.FC<GuidedCaptureWizardProps> = ({ onComp
       console.error("Camera error:", err);
       setCameraError("Unable to access camera. Please check permissions.");
     }
-  };
+  }, []);
 
-  const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
+  useEffect(() => {
+    if (step === 'capture') {
+      startCamera();
+    } else {
+      stopCamera();
     }
-  };
+    return () => stopCamera();
+  }, [step, startCamera, stopCamera]);
 
   const handleCapture = () => {
     if (videoRef.current && canvasRef.current) {
