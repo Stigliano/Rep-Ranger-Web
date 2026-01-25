@@ -1,5 +1,5 @@
 import { apiClient } from '@/shared/lib/api/client';
-import { AnalysisItem } from '../types';
+import { AnalysisItem, BodyTrackingSession } from '../types';
 
 interface AnalysisResponse {
   method: string;
@@ -30,9 +30,37 @@ export const bodyTrackingService = {
     return response.data;
   },
 
-  uploadPhoto: async (_file: File, _view: string, _date: string) => {
-    // TODO: Implement backend endpoint for photo upload
-    // Mock implementation for now
-    return Promise.resolve({ success: true });
+  uploadPhoto: async (file: File, view: string, date: string) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('viewType', view);
+    formData.append('date', date);
+
+    const response = await apiClient.post('/body-metrics/photos', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  getPhotos: async () => {
+    const response = await apiClient.get('/body-metrics/photos');
+    return response.data;
+  },
+
+  createSession: async (date: string, photoIds: string[], weight?: number, notes?: string) => {
+    const response = await apiClient.post<BodyTrackingSession>('/body-metrics/sessions', {
+      date,
+      photoIds,
+      weight,
+      notes
+    });
+    return response.data;
+  },
+
+  getSessions: async () => {
+    const response = await apiClient.get<BodyTrackingSession[]>('/body-metrics/sessions');
+    return response.data;
   }
 };

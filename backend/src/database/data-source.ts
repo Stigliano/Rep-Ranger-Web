@@ -12,6 +12,9 @@ import { ExerciseEntity } from '../entities/exercise.entity';
 import { WorkoutLogEntity } from '../entities/workout-log.entity';
 import { WorkoutLogExerciseEntity } from '../entities/workout-log-exercise.entity';
 import { WorkoutLogSetEntity } from '../entities/workout-log-set.entity';
+import { BodyMetric } from '../entities/body-metric.entity';
+import { BodyTrackingConfig } from '../entities/body-tracking-config.entity';
+import { BodyProgressPhoto } from '../entities/body-progress-photo.entity';
 
 /**
  * Carica variabili d'ambiente dal file .env
@@ -42,6 +45,9 @@ export const AppDataSource = new DataSource({
     WorkoutLogEntity,
     WorkoutLogExerciseEntity,
     WorkoutLogSetEntity,
+    BodyMetric,
+    BodyTrackingConfig,
+    BodyProgressPhoto,
   ],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false, // MAI true in produzione

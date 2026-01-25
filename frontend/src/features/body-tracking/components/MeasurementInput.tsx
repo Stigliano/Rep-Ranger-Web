@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface MeasurementInputProps {
   label: string;
@@ -10,11 +10,14 @@ interface MeasurementInputProps {
   onChange: (value: number) => void;
   status?: 'optimal' | 'over' | 'under';
   ideal?: number;
+  guideline?: string;
 }
 
 export const MeasurementInput: React.FC<MeasurementInputProps> = ({ 
-  label, value, unit, min = 0, max = 300, step = 0.5, onChange, status, ideal 
+  label, value, unit, min = 0, max = 300, step = 0.5, onChange, status, ideal, guideline
 }) => {
+  const [showInfo, setShowInfo] = useState(false);
+
   const handleChange = (newValue: number) => {
     const clamped = Math.min(max, Math.max(min, newValue));
     onChange(clamped);
@@ -35,9 +38,30 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
   };
 
   return (
-    <div className="mb-4">
+    <div className="mb-4 relative">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-sm font-medium text-gray-700">{label}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700">{label}</span>
+          {guideline && (
+            <div className="relative">
+              <button 
+                className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                onMouseEnter={() => setShowInfo(true)}
+                onMouseLeave={() => setShowInfo(false)}
+                onClick={() => setShowInfo(!showInfo)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              {showInfo && (
+                <div className="absolute left-0 top-6 z-50 w-64 p-3 bg-gray-900 text-white text-xs rounded shadow-lg pointer-events-none">
+                  {guideline}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <button 
             className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded hover:bg-gray-200"
@@ -85,4 +109,3 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
     </div>
   );
 };
-

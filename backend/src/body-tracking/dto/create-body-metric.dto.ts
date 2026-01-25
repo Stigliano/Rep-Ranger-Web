@@ -1,13 +1,9 @@
 import { IsString, IsNumber, IsDateString, IsIn, IsOptional, Min, Max } from 'class-validator';
+import { VALID_METRIC_TYPES } from '../constants/metric-types.constant';
 
 export class CreateBodyMetricDto {
   @IsString()
-  @IsIn([
-    'weight', 'height',
-    'neck', 'shoulders', 'chest', 'waist', 'hips', 
-    'bicep', 'forearm', 'wrist', 'thigh', 'calf', 'ankle',
-    'head_length', 'neck_length', 'torso_length', 'arm_length', 'leg_length'
-  ])
+  @IsIn(VALID_METRIC_TYPES)
   metricType: string;
 
   @IsNumber()
@@ -16,7 +12,7 @@ export class CreateBodyMetricDto {
   value: number;
 
   @IsString()
-  @IsIn(['kg', 'lbs', 'cm', 'inches'])
+  @IsIn(['kg', 'lbs', 'cm', 'inches', 'mm']) // Added mm for skinfolds
   unit: string;
 
   @IsDateString()
@@ -26,4 +22,3 @@ export class CreateBodyMetricDto {
   @IsString()
   notes?: string;
 }
-

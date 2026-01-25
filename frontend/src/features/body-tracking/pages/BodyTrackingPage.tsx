@@ -1,34 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { AvatarVisualizer } from '../components/AvatarVisualizer';
 import { MeasurementInput } from '../components/MeasurementInput';
-import { PhotoUpload } from '../components/PhotoUpload';
+import { GuidedCaptureWizard } from '../components/GuidedCaptureWizard';
+import { ComparisonGallery } from '../components/ComparisonGallery';
 import { bodyTrackingService } from '../services/bodyTrackingService';
-import { AnalysisItem, Gender, View } from '../types';
+import { AnalysisItem, Gender, View, BodyTrackingSession, BodyCompositionResult } from '../types';
+import { MEASUREMENT_CATEGORIES, MEASUREMENT_GUIDELINES } from '../data/measurement-guidelines';
 
 export const BodyTrackingPage: React.FC = () => {
   const [gender, setGender] = useState<Gender>('male');
-  const [view, setView] = useState<View>('front');
-  const [metrics, setMetrics] = useState<Record<string, number>>({
-    weight: 0, height: 175, chest: 0, waist: 0, hips: 0, shoulders: 0, bicep: 0, thigh: 0
-  });
+  const [view, setView] = useState<View>('FRONT');
+  const [metrics, setMetrics] = useState<Record<string, number>>({});
   const [analysis, setAnalysis] = useState<AnalysisItem[]>([]);
+  const [composition, setComposition] = useState<BodyCompositionResult | undefined>(undefined);
+  const [sessions, setSessions] = useState<BodyTrackingSession[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showWizard, setShowWizard] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>('general');
 
   const loadData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await bodyTrackingService.getAnalysis(gender);
-      setAnalysis(data.analysis);
+      const [analysisData, sessionsData] = await Promise.all([
+        bodyTrackingService.getAnalysis(gender),
+        bodyTrackingService.getSessions()
+      ]);
+      
+      setAnalysis(analysisData.analysis);
+      setComposition(analysisData.composition);
+      setSessions(sessionsData);
       
       // Update metrics from analysis data if available
       const newMetrics = { ...metrics };
-      data.analysis.forEach(item => {
+      
+      // Populate with current values from analysis
+      analysisData.analysis.forEach(item => {
         if (item.current) {
           newMetrics[item.part] = item.current;
         }
       });
+      
+      // Also populate from composition input if available (this logic might need backend support to return raw inputs, 
+      // but for now we rely on what getAnalysis returns in 'analysis' array or we might need a separate 'getLatestMetrics' call if not all metrics are analyzed)
+      // Since getAnalysis only returns analyzed parts, we might miss some raw metrics if they aren't part of the target analysis.
+      // Ideally, we should fetch all latest metrics separately or have getAnalysis return them.
+      // For now, let's assume the user will input them or they persist in local state if edited.
+      // To fix this properly, we'd need getAnalysis to return 'latestMetrics' map.
+      
       setMetrics(newMetrics);
     } catch (err) {
       console.error('Failed to load body tracking data', err);
@@ -48,13 +68,17 @@ export const BodyTrackingPage: React.FC = () => {
     setMetrics(prev => ({ ...prev, [key]: value }));
     
     try {
-      await bodyTrackingService.saveMetric(key, value, key === 'weight' ? 'kg' : 'cm');
+      // Determine unit based on key or guideline
+      const unit = MEASUREMENT_GUIDELINES[key]?.category === 'skinfold' ? 'mm' : (key === 'weight' ? 'kg' : 'cm');
+      await bodyTrackingService.saveMetric(key, value, unit);
+      
       // Reload analysis to update targets and status based on new value
+      // Debounce this if possible, but for now direct call
       const data = await bodyTrackingService.getAnalysis(gender);
       setAnalysis(data.analysis);
+      setComposition(data.composition);
     } catch (err) {
       console.error('Failed to save metric', err);
-      // Revert or show error
       setError('Errore durante il salvataggio della metrica.');
     }
   };
@@ -66,7 +90,7 @@ export const BodyTrackingPage: React.FC = () => {
           <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center text-white font-bold">BT</div>
           <div>
             <h1 className="text-lg font-bold text-gray-900">Body Tracker</h1>
-            <p className="text-xs text-gray-500">Proportion Analysis</p>
+            <p className="text-xs text-gray-500">Analisi e Composizione Corporea</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -78,7 +102,7 @@ export const BodyTrackingPage: React.FC = () => {
                 gender === g ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {g === 'male' ? '♂ Male' : '♀ Female'}
+              {g === 'male' ? '♂ Uomo' : '♀ Donna'}
             </button>
           ))}
         </div>
@@ -90,41 +114,40 @@ export const BodyTrackingPage: React.FC = () => {
         </div>
       )}
 
-      <div className={`grid grid-cols-1 lg:grid-cols-[350px_1fr_300px] gap-6 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
+      <div className={`grid grid-cols-1 lg:grid-cols-[400px_1fr_300px] gap-6 mb-8 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
         {/* LEFT COLUMN: Inputs */}
         <div className="space-y-6">
           <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-            <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Measurements</h2>
-            <div className="space-y-1">
-              <MeasurementInput 
-                label="Weight" 
-                value={metrics.weight} 
-                unit="kg" 
-                onChange={(v) => handleMetricChange('weight', v)} 
-              />
-              <MeasurementInput 
-                label="Chest" 
-                value={metrics.chest} 
-                unit="cm" 
-                onChange={(v) => handleMetricChange('chest', v)}
-                status={analysis.find(a => a.part === 'chest')?.status}
-                ideal={analysis.find(a => a.part === 'chest')?.ideal}
-              />
-              <MeasurementInput 
-                label="Waist" 
-                value={metrics.waist} 
-                unit="cm" 
-                onChange={(v) => handleMetricChange('waist', v)}
-                status={analysis.find(a => a.part === 'waist')?.status}
-                ideal={analysis.find(a => a.part === 'waist')?.ideal}
-              />
-              <MeasurementInput 
-                label="Shoulders" 
-                value={metrics.shoulders} 
-                unit="cm" 
-                onChange={(v) => handleMetricChange('shoulders', v)}
-              />
-              {/* More inputs... */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Misure</h2>
+              <select 
+                value={activeCategory} 
+                onChange={(e) => setActiveCategory(e.target.value)}
+                className="text-sm border-gray-300 rounded-md shadow-sm focus:border-black focus:ring-black"
+              >
+                {MEASUREMENT_CATEGORIES.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.label}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="space-y-1 max-h-[600px] overflow-y-auto pr-2">
+              {Object.values(MEASUREMENT_GUIDELINES)
+                .filter(g => g.category === activeCategory)
+                .map(guideline => (
+                  <MeasurementInput 
+                    key={guideline.id}
+                    label={guideline.label}
+                    value={metrics[guideline.id] || 0}
+                    unit={guideline.category === 'skinfold' ? 'mm' : (guideline.id === 'weight' ? 'kg' : 'cm')}
+                    max={guideline.category === 'skinfold' ? 100 : 300}
+                    step={guideline.category === 'skinfold' ? 1 : 0.5}
+                    onChange={(v) => handleMetricChange(guideline.id, v)}
+                    status={analysis.find(a => a.part === guideline.id)?.status}
+                    ideal={analysis.find(a => a.part === guideline.id)?.ideal}
+                    guideline={guideline.instructions}
+                  />
+                ))}
             </div>
           </section>
         </div>
@@ -134,7 +157,7 @@ export const BodyTrackingPage: React.FC = () => {
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex-1 relative min-h-[500px]">
             <div className="absolute top-4 left-4 right-4 flex justify-between z-10">
               <div className="flex bg-gray-100 p-1 rounded-lg">
-                {['front', 'side'].map(v => (
+                {['FRONT', 'LEFT_SIDE'].map(v => (
                   <button
                     key={v}
                     onClick={() => setView(v as View)}
@@ -142,7 +165,7 @@ export const BodyTrackingPage: React.FC = () => {
                       view === v ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-black'
                     }`}
                   >
-                    {v.charAt(0).toUpperCase() + v.slice(1)}
+                    {v === 'FRONT' ? 'Fronte' : 'Lato'}
                   </button>
                 ))}
               </div>
@@ -152,7 +175,7 @@ export const BodyTrackingPage: React.FC = () => {
               <AvatarVisualizer 
                 measurements={metrics} 
                 gender={gender} 
-                view={view} 
+                view={view === 'FRONT' ? 'front' : 'side'} 
                 showGuides={true}
                 showLabels={true}
                 analysis={analysis}
@@ -161,33 +184,101 @@ export const BodyTrackingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Photos & Stats */}
+        {/* RIGHT COLUMN: Actions & Analysis */}
         <div className="space-y-6">
           <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-            <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Progress Photos</h2>
-            <PhotoUpload onUpload={(file, view, date) => bodyTrackingService.uploadPhoto(file, view, date).then(() => {})} />
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              {/* Placeholder for gallery */}
-              <div className="aspect-square bg-gray-100 rounded-lg"></div>
-              <div className="aspect-square bg-gray-100 rounded-lg"></div>
-              <div className="aspect-square bg-gray-100 rounded-lg"></div>
-            </div>
+            <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Azioni</h2>
+            <button 
+              onClick={() => setShowWizard(true)}
+              className="w-full py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+            >
+              <span>📷</span> Nuovo Check-in
+            </button>
           </section>
 
+          {/* Body Composition Card */}
+          {composition && (
+            <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+              <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Composizione Corporea</h2>
+              <div className="space-y-4">
+                {composition.bodyFat && (
+                  <div className="p-3 bg-blue-50 rounded-lg">
+                    <div className="text-xs text-blue-600 font-semibold mb-1">Massa Grassa ({composition.bodyFat.method})</div>
+                    <div className="text-2xl font-bold text-blue-900">{composition.bodyFat.value}%</div>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 gap-3">
+                  {composition.bmi && (
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xs text-gray-500 mb-1">BMI</div>
+                      <div className="text-lg font-bold">{composition.bmi.value}</div>
+                      <div className="text-xs text-gray-600">{composition.bmi.status}</div>
+                    </div>
+                  )}
+                  {composition.ffmi && (
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xs text-gray-500 mb-1">FFMI</div>
+                      <div className="text-lg font-bold">{composition.ffmi.value}</div>
+                      <div className="text-xs text-gray-600">{composition.ffmi.status}</div>
+                    </div>
+                  )}
+                  {composition.whr && (
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xs text-gray-500 mb-1">WHR</div>
+                      <div className="text-lg font-bold">{composition.whr.value}</div>
+                      <div className="text-xs text-gray-600">{composition.whr.status}</div>
+                    </div>
+                  )}
+                  {composition.whtr && (
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xs text-gray-500 mb-1">WHtR</div>
+                      <div className="text-lg font-bold">{composition.whtr.value}</div>
+                      <div className="text-xs text-gray-600">{composition.whtr.status}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
           <section className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-            <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Analysis</h2>
+            <h2 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Analisi Proporzioni</h2>
             <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600">Optimal Parts</span>
-                <span className="font-bold text-green-600">3/9</span>
+                <span className="text-gray-600">Parti Ottimali</span>
+                <span className="font-bold text-green-600">
+                  {analysis.filter(a => a.status === 'optimal').length}/{analysis.length}
+                </span>
               </div>
               <div className="w-full bg-gray-100 rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full w-1/3"></div>
+                <div 
+                  className="bg-green-500 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${(analysis.filter(a => a.status === 'optimal').length / Math.max(analysis.length, 1)) * 100}%` }}
+                ></div>
               </div>
             </div>
           </section>
         </div>
       </div>
+
+      {/* BOTTOM SECTION: Gallery */}
+      <section className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <h2 className="text-lg font-bold text-gray-900 mb-6">Galleria Progressi</h2>
+        <ComparisonGallery sessions={sessions} />
+      </section>
+
+      {/* WIZARD MODAL */}
+      {showWizard && (
+        <GuidedCaptureWizard 
+          onComplete={() => {
+            setShowWizard(false);
+            loadData();
+          }}
+          onCancel={() => setShowWizard(false)}
+          lastSession={sessions[0]}
+        />
+      )}
     </div>
   );
 };
