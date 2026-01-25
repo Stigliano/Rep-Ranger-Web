@@ -7,7 +7,9 @@
 ## Riepilogo Esecutivo
 Il deploy della versione con i fix (`commit 6908238`) è stato completato con successo lato codice, ma **le migrazioni del database non sono state eseguite**. Di conseguenza, le nuove tabelle non esistono ancora nel database di produzione, causando errori 500 su tutte le operazioni che coinvolgono sessioni e foto.
 
-Un successivo tentativo di deploy (`commit 05f1822`) è fallito a causa della mancanza della dipendenza `dotenv` in produzione, necessaria per l'inizializzazione del `DataSource` durante le migrazioni.
+Successivi tentativi di deploy hanno fallito per problemi di dipendenze:
+1.  `commit 05f1822`: Mancanza di `dotenv`.
+2.  `commit 762be72`: Crash all'avvio del container per mancanza di `reflect-metadata`.
 
 ## Risultati Test Post-Deploy (PowerShell)
 
@@ -32,13 +34,16 @@ Un successivo tentativo di deploy (`commit 05f1822`) è fallito a causa della ma
 
 ## Analisi Causa Radice
 1.  **Mancata Esecuzione Migrazioni:** Non esisteva un automatismo per l'esecuzione delle migrazioni all'avvio del container in produzione.
-2.  **Dipendenza Mancante:** Il pacchetto `dotenv` era utilizzato in `data-source.ts` ma non era elencato nelle `dependencies` di `package.json`, causando il fallimento dello script di migrazione in produzione.
+2.  **Dipendenze Mancanti:**
+    - `dotenv`: Necessario per leggere `.env` in `data-source.ts`.
+    - `reflect-metadata`: Necessario per TypeORM e NestJS, deve essere importato esplicitamente all'inizio dell'esecuzione.
 
 ## Azioni Correttive
 1.  **Aggiornare `data-source.ts`:** Modificato il pattern delle migrazioni per supportare sia `.ts` (sviluppo) che `.js` (produzione). (Completato)
 2.  **Creare Script Migrazione Prod:** Aggiunto script in `package.json` per eseguire le migrazioni usando i file compilati in `dist`. (Completato)
 3.  **Aggiornare Dockerfile:** Modificato il comando `CMD` per eseguire le migrazioni prima di avviare l'applicazione. (Completato)
-4.  **Installare Dipendenza:** Aggiunto `dotenv` alle dipendenze di produzione. (In Corso)
+4.  **Installare Dipendenza:** Aggiunto `dotenv` alle dipendenze di produzione. (Completato)
+5.  **Importare Reflect Metadata:** Aggiunto `import 'reflect-metadata';` in `data-source.ts` e `main.ts`. (In Corso)
 
 ## Strumenti Utilizzati
 - **PowerShell:** Script `test_production.ps1` per smoke test automatizzati.
